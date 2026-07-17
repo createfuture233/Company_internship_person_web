@@ -1,0 +1,6 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro'
+import ProximityHeading from '../../components/ProximityHeading'
+import { articles } from '../../data/content'
+---
+<BaseLayout title="文章｜个人星球"><section class="section standalone-page"><div class="section-heading"><div><p class="eyebrow">WRITING</p><h2><ProximityHeading client:load label="最近的记录" /></h2></div></div><div class="article-grid">{articles.map((article, index) => <article class="article-card"><div class={`article-illustration illustration-${index + 1}`}><span>{article.tag}</span></div><p class="meta">{article.date} · {article.minutes} 分钟阅读</p><h3>{article.title}</h3><p>{article.excerpt}</p><a class="text-button reveal-link" href={`/articles/${article.id}`}>阅读文章 ↗</a></article>)}</div><div class="detail-block"><p class="eyebrow">TOPICS I FOLLOW</p><div class="topic-grid"><span>前端工程化</span><span>交互与动效</span><span>产品思考</span><span>个人成长</span><span>设计灵感</span><span>AI 协作</span></div></div></section></BaseLayout>

@@ -1,0 +1,43 @@
+---
+import '../styles.css'
+import Navigation from '../components/Navigation'
+import Footer from '../components/Footer'
+const { title = '个人星球', description = '个人星球：记录作品、思考与成长。' } = Astro.props
+---
+<!doctype html>
+<html lang="zh-CN" data-theme="light">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content={description} />
+    <title>{title}</title>
+  </head>
+  <body>
+    <Navigation client:load />
+    <main><slot /></main>
+    <Footer client:load />
+    <script>
+      const savedTheme = localStorage.getItem('personal-planet-theme')
+      if (savedTheme === 'dark' || savedTheme === 'light') document.documentElement.dataset.theme = savedTheme
+      document.addEventListener('click', (event) => {
+        const link = (event.target as Element).closest<HTMLAnchorElement>('.reveal-link')
+        if (link) sessionStorage.setItem('reveal-origin', JSON.stringify({ x: event.clientX, y: event.clientY }))
+      })
+      document.addEventListener('click', (event) => {
+        const toggle = (event.target as Element).closest<HTMLElement>('[data-theme-toggle]')
+        if (!toggle) return
+        const theme = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark'
+        document.documentElement.dataset.theme = theme
+        localStorage.setItem('personal-planet-theme', theme)
+      })
+      const detail = document.querySelector<HTMLElement>('.detail-reveal')
+      const origin = sessionStorage.getItem('reveal-origin')
+      if (detail && origin) {
+        const { x, y } = JSON.parse(origin)
+        detail.style.setProperty('--reveal-x', `${x}px`)
+        detail.style.setProperty('--reveal-y', `${y}px`)
+        sessionStorage.removeItem('reveal-origin')
+      }
+    </script>
+  </body>
+</html>
