@@ -1,3 +1,4 @@
+import { apiBase } from '../lib/api'
 import { useEffect, useState } from 'react'
 import { Heart, MessageCircle, Send } from 'lucide-react'
 
@@ -18,7 +19,6 @@ type CommentsProps = {
   contentId: string
 }
 
-const apiBase = import.meta.env.PUBLIC_API_BASE ?? 'http://localhost:3000/api'
 
 function visitorKey() {
   const key = 'personal-planet-visitor-key'

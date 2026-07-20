@@ -1,7 +1,7 @@
+import { apiBase } from '../lib/api'
 import { Shield, X } from 'lucide-react'
 import { useState } from 'react'
 
-const apiBase = import.meta.env.PUBLIC_API_BASE ?? 'http://localhost:3000/api'
 
 export default function AdminPlanetLogin() {
   const [showLogin, setShowLogin] = useState(false)

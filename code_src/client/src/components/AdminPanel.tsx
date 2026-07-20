@@ -1,10 +1,10 @@
+import { apiBase } from '../lib/api'
 import { useEffect, useState } from 'react'
 import { Eye, Plus, Save, ShieldAlert } from 'lucide-react'
 
 type ContentType = 'article' | 'project'
 type ContentItem = { id: string; type: ContentType; title: string; summary: string; body: string }
 
-const apiBase = import.meta.env.PUBLIC_API_BASE ?? 'http://localhost:3000/api'
 
 const blankContent = (type: ContentType): ContentItem => ({
   id: '',

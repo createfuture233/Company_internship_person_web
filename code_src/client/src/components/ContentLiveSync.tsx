@@ -1,7 +1,7 @@
+import { apiBase } from '../lib/api'
 import { useEffect } from 'react'
 
 type ContentType = 'article' | 'project'
-const apiBase = import.meta.env.PUBLIC_API_BASE ?? 'http://localhost:3000/api'
 
 export default function ContentLiveSync({ type, id }: { type: ContentType; id: string }) {
   useEffect(() => {

@@ -213,3 +213,50 @@
 - 管理员可在更改页面新增或编辑文章、作品，并在右侧实时预览。
 - 管理员保存后，已有详情页刷新可显示更新后的标题、摘要和正文。
 - 管理员退出后，管理入口和详情页修改按钮消失。
+## 11. 前后端分离与项目目录规范
+
+项目采用“同仓库、独立应用”的前后端分离模式：前端只处理页面、交互和接口调用；后端处理鉴权、数据校验、业务规则与数据库访问；双方通过 HTTP REST API 传递 JSON 数据。
+
+```text
+Company_internship_person_web/
+├─ doc/                              # 需求、数据库与部署文档
+├─ code_src/
+│  ├─ package.json                   # Workspace 根脚本
+│  ├─ .gitignore
+│  ├─ client/                        # 前端：Astro + React Islands
+│  │  ├─ public/                     # 图片、图标等静态资源
+│  │  ├─ src/
+│  │  │  ├─ pages/                   # 页面路由
+│  │  │  ├─ components/              # React 交互组件
+│  │  │  ├─ layouts/                 # 公共布局
+│  │  │  ├─ lib/                     # API 请求与通用工具
+│  │  │  ├─ types/                   # TypeScript 类型
+│  │  │  ├─ styles/                  # 全局和主题样式
+│  │  │  └─ data/                    # 静态展示或离线兜底数据
+│  │  └─ package.json
+│  └─ server/                        # 后端：NestJS + Prisma
+│     ├─ prisma/                     # Prisma Schema 与迁移
+│     ├─ data/                       # SQLite 运行数据库，不提交 Git
+│     ├─ src/
+│     │  ├─ main.ts                  # 服务启动、CORS、全局管道
+│     │  ├─ prisma/                  # PrismaService 与连接模块
+│     │  └─ modules/                 # 后续按业务模块拆分
+│     ├─ .env                        # 本地配置，不提交 Git
+│     └─ package.json
+└─ README.md                         # 项目总说明
+```
+
+### 11.1 数据流与边界
+
+```text
+浏览器 / Astro + React
+        ↓ fetch / JSON
+NestJS REST API（鉴权、校验、业务规则）
+        ↓ Prisma ORM
+SQLite（内容、评论、会话、订阅等数据）
+```
+
+- 客户端接口根地址统一放在 `client/src/lib/api.ts`，生产环境使用 `PUBLIC_API_BASE` 配置后端地址。
+- 正式内容、评论、管理员会话、联系表单和订阅数据以数据库接口返回结果为准；`client/src/data/` 仅用于静态展示或离线兜底。
+- `dist/`、`.astro/`、`node_modules/`、`.env` 和 `server/data/*.db` 属于生成文件、依赖或敏感运行数据，不提交 Git。
+- 后端业务继续增长时，应把现有接口逐步迁移为 `auth`、`contents`、`comments`、`admin` 等独立模块，避免把业务逻辑继续堆积在 `main.ts`。

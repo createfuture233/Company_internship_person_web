@@ -1,7 +1,7 @@
+import { apiBase } from '../lib/api'
 import { LogOut, Menu, Moon, Sun, X } from 'lucide-react'
 import { useEffect, useState } from 'react'
 
-const apiBase = import.meta.env.PUBLIC_API_BASE ?? 'http://localhost:3000/api'
 const links = [
   { href: '/about', label: '关于' },
   { href: '/articles', label: '文章' },
