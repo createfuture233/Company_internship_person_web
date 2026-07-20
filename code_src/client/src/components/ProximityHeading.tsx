@@ -9,8 +9,8 @@ export default function ProximityHeading({ label }: { label: string }) {
       containerRef={ref}
       radius={100}
       falloff="linear"
-      fromFontVariationSettings="'wght' 400, 'opsz' 14"
-      toFontVariationSettings="'wght' 900, 'opsz' 40"
+      fromFontVariationSettings="'wght' 450"
+      toFontVariationSettings="'wght' 700"
     />
   </span>
 }

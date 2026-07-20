@@ -74,6 +74,11 @@ export default function VariableProximity({
           const normalized = Math.min(Math.max(1 - distance / radius, 0), 1)
           const amount = falloff === 'exponential' ? normalized ** 2 : falloff === 'gaussian' ? Math.exp(-((distance / (radius / 2)) ** 2) / 2) : normalized
           letter.style.fontVariationSettings = settings.map(({ axis, fromValue, toValue }) => `'${axis}' ${fromValue + (toValue - fromValue) * amount}`).join(', ')
+          letter.style.setProperty('--proximity-scale', `${1 + amount * .16}`)
+          letter.style.setProperty('--proximity-lift', `${amount * -10}px`)
+          letter.style.setProperty('--proximity-rotate', `${(amount - .5) * 5}deg`)
+          letter.style.setProperty('--proximity-opacity', `${.68 + amount * .32}`)
+          letter.style.setProperty('--proximity-glow', `${amount * 18}px`)
         })
       }
       frame = requestAnimationFrame(animate)

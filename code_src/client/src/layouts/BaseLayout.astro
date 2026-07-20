@@ -16,6 +16,7 @@ const { title = '个人星球', description = '个人星球：记录作品、思
     <Navigation client:load />
     <main><slot /></main>
     <Footer client:load />
+    <button class="back-to-top" type="button" aria-label="Back to top" data-back-to-top><span>↑</span><i></i></button>
     <script>
       const savedTheme = localStorage.getItem('personal-planet-theme')
       if (savedTheme === 'dark' || savedTheme === 'light') document.documentElement.dataset.theme = savedTheme
@@ -38,6 +39,64 @@ const { title = '个人星球', description = '个人星球：记录作品、思
         detail.style.setProperty('--reveal-y', `${y}px`)
         sessionStorage.removeItem('reveal-origin')
       }
-    </script>
+      {
+        const revealSelector = [
+          'main section > *',
+          'main .detail-page > *',
+          'main .detail-body > *',
+          'main .page-contact > *',
+          'main form > *',
+          'main .article-grid > *',
+          'main .project-grid > *',
+          'main .explore-grid > *',
+          'main .stats-grid > *',
+          'main .timeline > *',
+          'main .topic-grid > *',
+          'main .detail-block > *',
+          'main .two-column > *',
+          'main .process-grid > *',
+          'main .skill-list > *'
+        ].join(', ')
+        const revealItems = [...document.querySelectorAll<HTMLElement>(revealSelector)]
+        revealItems.forEach((item, index) => {
+          item.classList.add('scroll-reveal')
+          item.style.setProperty('--scroll-reveal-delay', `${(index % 5) * 70}ms`)
+        })
+        const observer = new IntersectionObserver((entries) => {
+          entries.forEach((entry) => entry.target.classList.toggle('is-visible', entry.isIntersecting))
+        }, { threshold: .12, rootMargin: '0px 0px -4% 0px' })
+        revealItems.forEach((item) => observer.observe(item))
+      }
+      const tiltCards = document.querySelectorAll<HTMLElement>('.stat-grid > div, .explore-grid > a, .article-card, .project-card, .timeline article, .process-grid article, .about-panel, .topic-grid span')
+      tiltCards.forEach((card) => {
+        card.addEventListener('pointermove', (event) => {
+          const rect = card.getBoundingClientRect()
+          const x = (event.clientX - rect.left) / rect.width
+          const y = (event.clientY - rect.top) / rect.height
+          card.style.setProperty('--card-tilt-x', `${(0.5 - y) * 6}deg`)
+          card.style.setProperty('--card-tilt-y', `${(x - 0.5) * 7}deg`)
+          card.style.setProperty('--card-glow-x', `${x * 100}%`)
+          card.style.setProperty('--card-glow-y', `${y * 100}%`)
+        })
+        card.addEventListener('pointerleave', () => {
+          card.style.setProperty('--card-tilt-x', '0deg')
+          card.style.setProperty('--card-tilt-y', '0deg')
+          card.style.setProperty('--card-glow-x', '50%')
+          card.style.setProperty('--card-glow-y', '0%')
+        })
+      })
+      const backToTop = document.querySelector<HTMLButtonElement>('[data-back-to-top]')
+      const syncBackToTop = () => backToTop?.classList.toggle('is-visible', window.scrollY > 280)
+      window.addEventListener('scroll', syncBackToTop, { passive: true })
+      syncBackToTop()
+      backToTop?.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }))
+      const currentPath = window.location.pathname.replace(/\/$/, '') || '/'
+      document.querySelectorAll<HTMLAnchorElement>('.nav .links a').forEach((link) => {
+        const linkPath = link.pathname.replace(/\/$/, '') || '/'
+        const isCurrent = linkPath === currentPath
+        link.classList.toggle('active', isCurrent)
+        if (isCurrent) link.setAttribute('aria-current', 'page')
+        else link.removeAttribute('aria-current')
+      })    </script>
   </body>
 </html>
