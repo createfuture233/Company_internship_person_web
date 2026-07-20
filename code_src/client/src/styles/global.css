@@ -1106,3 +1106,181 @@ main :is(h1, h2, h3, p, a, li):hover {
 @media (max-width: 600px) {
   .admin-create-actions button { flex: 1; justify-content: center; }
 }
+/* Contact form: readable controls and clear feedback in both themes. */
+.contact { max-width: 1280px; padding: clamp(52px, 6vw, 86px); gap: clamp(48px, 7vw, 112px); }
+.contact-form { display: grid; gap: 21px; }
+.contact-form label {
+  display: grid;
+  gap: 10px;
+  color: #eaf4eb;
+  font: 600 16px/1.4 'Noto Sans SC', sans-serif;
+  letter-spacing: .2px;
+}
+.contact-form input,
+.contact-form textarea {
+  width: 100%;
+  padding: 16px 18px;
+  color: #fffdf8;
+  caret-color: #f99b77;
+  border: 1px solid #dcebdd8a;
+  border-radius: 13px;
+  outline: none;
+  background: #ffffff14;
+  font: 16px/1.65 'Noto Sans SC', sans-serif;
+  resize: vertical;
+  transition: border-color .2s, background .2s, box-shadow .2s;
+}
+.contact-form textarea { min-height: 142px; }
+.contact-form input::placeholder,
+.contact-form textarea::placeholder { color: #d3ddd4b8; opacity: 1; }
+.contact-form input:focus,
+.contact-form textarea:focus { border-color: #f99b77; background: #ffffff1d; box-shadow: 0 0 0 4px #f99b7726; }
+.contact-form .primary-button { min-height: 62px; font-size: 17px; font-weight: 700; }
+.contact-form .primary-button:disabled { cursor: wait; opacity: .72; transform: none; }
+.contact-feedback { margin: -4px 0 0; font-size: 15px; line-height: 1.6; }
+.contact-feedback.success { color: #bce9bd; }
+.contact-feedback.error { color: #ffc0aa; }
+.contact-feedback.idle { color: #dbe9dc; }
+:root[data-theme='light'] .contact-form label { color: #f1f6ef; }
+:root[data-theme='light'] .contact-form input,
+:root[data-theme='light'] .contact-form textarea { color: #fffdf8; border-color: #ffffff73; background: #ffffff16; }
+:root[data-theme='light'] .contact-form input::placeholder,
+:root[data-theme='light'] .contact-form textarea::placeholder { color: #eef3ecb8; }
+:root[data-theme='light'] .contact-form input:focus,
+:root[data-theme='light'] .contact-form textarea:focus { border-color: #f99b77; background: #ffffff22; box-shadow: 0 0 0 4px #f99b7730; }
+@media (max-width: 720px) {
+  .contact { padding: 48px 25px; }
+  .contact-form label { font-size: 15px; }
+  .contact-form input, .contact-form textarea { font-size: 16px; padding: 15px 16px; }
+}
+/* Softer, more compact contact surface. */
+.contact.page-contact {
+  width: min(1040px, calc(100% - 48px));
+  min-height: 640px;
+  margin:100px auto 48px;
+  padding: clamp(42px, 5vw, 64px);
+  gap: clamp(42px, 6vw, 84px);
+  border: 1px solid #98afa04d;
+  background: linear-gradient(135deg, #dce8d7 0%, #e9efe2 56%, #d4e0d4 100%);
+  color: #f5a209;
+  box-shadow: 0 18px 42px #40574618;
+}
+.contact.page-contact .eyebrow { color: #527864; }
+.contact.page-contact h2 { color: #263b32; }
+.contact.page-contact h2 span { color: #dc795a; }
+.contact.page-contact .contact-links a,
+.contact.page-contact .contact-form label { color: #3e5a4c; }
+.contact.page-contact .contact-links a:hover { color: #263b32; }
+.contact.page-contact .contact-form input,
+.contact.page-contact .contact-form textarea {
+  color: #263b32;
+  border-color: #93a99a;
+  background: #fbfcf8c9;
+  box-shadow: inset 0 1px 0 #ffffffa8;
+}
+.contact.page-contact .contact-form input::placeholder,
+.contact.page-contact .contact-form textarea::placeholder { color: #74877b; }
+.contact.page-contact .contact-form input:focus,
+.contact.page-contact .contact-form textarea:focus {
+  border-color: #dc795a;
+  background: #ffffff;
+  box-shadow: 0 0 0 4px #dc795a2b;
+}
+.contact.page-contact .contact-feedback.success { color: #397253; }
+.contact.page-contact .contact-feedback.error { color: #b34f42; }
+:root[data-theme='dark'] .contact.page-contact {
+  background: linear-gradient(135deg, #203b32, #2c4b40);
+  border-color: #91b1a05c;
+  box-shadow: 0 18px 46px #0000002e;
+  color: #eff6e9;
+}
+:root[data-theme='dark'] .contact.page-contact h2 { color: #f2f7ee; }
+:root[data-theme='dark'] .contact.page-contact .contact-links a,
+:root[data-theme='dark'] .contact.page-contact .contact-form label { color: #d5e5d7; }
+:root[data-theme='dark'] .contact.page-contact .contact-form input,
+:root[data-theme='dark'] .contact.page-contact .contact-form textarea {
+  color: #f4f8f1;
+  border-color: #bcd0bd8f;
+  background: #ffffff14;
+}
+@media (max-width: 720px) {
+  .contact.page-contact { width: calc(100% - 24px); min-height: auto; margin: 18px auto 28px; padding: 40px 24px; }
+}
+/* Explicit light/dark contact palettes. */
+:root[data-theme='light'] .contact.page-contact {
+  background: linear-gradient(135deg, #fff9ef 0%, #f4f1df 54%, #e6f0db 100%);
+  border-color: #e7dfcc;
+  color: #294337;
+  box-shadow: 0 18px 42px #8e806018;
+}
+:root[data-theme='light'] .contact.page-contact .eyebrow { color: #5c866e; }
+:root[data-theme='light'] .contact.page-contact h2 { color: #294337; }
+:root[data-theme='light'] .contact.page-contact h2 span { color: #e98161; }
+:root[data-theme='light'] .contact.page-contact .contact-links a,
+:root[data-theme='light'] .contact.page-contact .contact-form label { color: #4d6758; }
+:root[data-theme='light'] .contact.page-contact .contact-form input,
+:root[data-theme='light'] .contact.page-contact .contact-form textarea {
+  color: #294337;
+  border-color: #c6d1bd;
+  background: #fffef9;
+  box-shadow: inset 0 1px #ffffff;
+}
+:root[data-theme='light'] .contact.page-contact .contact-form input::placeholder,
+:root[data-theme='light'] .contact.page-contact .contact-form textarea::placeholder { color: #8a9a8c; }
+:root[data-theme='light'] .contact.page-contact .contact-form input:focus,
+:root[data-theme='light'] .contact.page-contact .contact-form textarea:focus {
+  border-color: #e98161;
+  background: #ffffff;
+  box-shadow: 0 0 0 4px #e9816124;
+}
+:root[data-theme='dark'] .contact.page-contact {
+  background: linear-gradient(135deg, #172c27 0%, #203a32 55%, #294338 100%);
+  border-color: #6d93815c;
+  color: #edf6ee;
+  box-shadow: 0 22px 52px #0000004a;
+}
+:root[data-theme='dark'] .contact.page-contact .contact-form input,
+:root[data-theme='dark'] .contact.page-contact .contact-form textarea { color: #f4faf3; background: #ffffff12; }
+/* Dark theme: align contact card with the site navy / cyan / violet system. */
+:root[data-theme='dark'] .contact.page-contact {
+  background:
+    radial-gradient(circle at 88% 8%, #7961d22b 0, transparent 34%),
+    radial-gradient(circle at 10% 95%, #42cbe01c 0, transparent 38%),
+    linear-gradient(135deg, #0c1530 0%, #121a38 54%, #17142f 100%);
+  border-color: #7087ca57;
+  color: #edf4ff;
+  box-shadow: 0 22px 54px #00000055, inset 0 1px #dce9ff12;
+}
+:root[data-theme='dark'] .contact.page-contact .eyebrow { color: #75dff0; }
+:root[data-theme='dark'] .contact.page-contact h2 { color: #f1f6ff; }
+:root[data-theme='dark'] .contact.page-contact h2 span { color: #ff9478; }
+:root[data-theme='dark'] .contact.page-contact .contact-links a,
+:root[data-theme='dark'] .contact.page-contact .contact-form label { color: #bdcae7; }
+:root[data-theme='dark'] .contact.page-contact .contact-links a:hover { color: #7cecff; }
+:root[data-theme='dark'] .contact.page-contact .contact-form input,
+:root[data-theme='dark'] .contact.page-contact .contact-form textarea {
+  color: #f3f8ff;
+  caret-color: #75eaff;
+  border-color: #8aa6d06b;
+  background: #071126a8;
+  box-shadow: inset 0 1px #ffffff0d;
+}
+:root[data-theme='dark'] .contact.page-contact .contact-form input::placeholder,
+:root[data-theme='dark'] .contact.page-contact .contact-form textarea::placeholder { color: #8da0c3; }
+:root[data-theme='dark'] .contact.page-contact .contact-form input:focus,
+:root[data-theme='dark'] .contact.page-contact .contact-form textarea:focus {
+  border-color: #6fe8ff;
+  background: #0a1630;
+  box-shadow: 0 0 0 4px #6fe8ff1c, 0 0 18px #6fe8ff1a;
+}
+:root[data-theme='dark'] .contact.page-contact .primary-button {
+  color: #06111f;
+  border-color: #67e8ff;
+  background: linear-gradient(100deg, #67e8ff, #8ca4ff);
+  box-shadow: 0 8px 24px #4acff43b;
+}
+:root[data-theme='dark'] .contact.page-contact .primary-button:hover {
+  box-shadow: 0 11px 30px #4acff461;
+}
+:root[data-theme='dark'] .contact.page-contact .contact-feedback.success { color: #91efcf; }
+:root[data-theme='dark'] .contact.page-contact .contact-feedback.error { color: #ffaf9d; }
