@@ -364,13 +364,20 @@ class AppController implements OnModuleInit {
   async adminComments(
     @Headers('authorization') authorization: string | undefined,
     @Query('status') status?: CommentStatus,
+    @Query('contentType') contentType?: ContentType,
+    @Query('contentId') contentId?: string,
+    @Query('sort') sort: CommentSort = 'latest',
   ) {
     await this.requireAdmin(authorization)
-    const where = status && ['visible', 'hidden', 'spam'].includes(status) ? { status } : {}
+    const where: Prisma.CommentWhereInput = {}
+    if (status && ['visible', 'hidden', 'spam'].includes(status)) where.status = status
+    if (contentType && ['article', 'project'].includes(contentType)) where.content = { type: contentType }
+    if (contentId?.trim()) where.contentId = contentId.trim()
+    if (!['latest', 'likes'].includes(sort)) throw new BadRequestException('sort must be latest or likes')
     return this.prisma.comment.findMany({
       where,
       include: { content: { select: { title: true, type: true } } },
-      orderBy: { createdAt: 'desc' },
+      orderBy: sort === 'likes' ? [{ likes: 'desc' }, { createdAt: 'desc' }] : { createdAt: 'desc' },
     })
   }
 
