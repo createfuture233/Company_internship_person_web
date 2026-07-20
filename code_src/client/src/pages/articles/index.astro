@@ -1,6 +1,79 @@
 ---
-import BaseLayout from '../../layouts/BaseLayout.astro'
-import ProximityHeading from '../../components/ProximityHeading'
-import { articles } from '../../data/content'
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import ProximityHeading from "../../components/ProximityHeading";
+import { apiBase } from "../../lib/api";
+
+type Article = {
+  id: string;
+  title: string;
+  summary: string;
+  publishedAt: string | null;
+  tags: Array<{ name: string }>;
+};
+
+let articles: Article[] = [];
+let loadError = false;
+try {
+  const response = await fetch(`${apiBase}/articles`);
+  if (!response.ok) throw new Error("Unable to load articles");
+  articles = await response.json();
+} catch {
+  loadError = true;
+}
+
+const formatDate = (value: string | null) =>
+  value
+    ? new Intl.DateTimeFormat("zh-CN", { dateStyle: "medium" }).format(
+        new Date(value),
+      )
+    : "持续更新";
 ---
-<BaseLayout title="文章｜个人星球"><section class="section standalone-page"><div class="section-heading"><div><p class="eyebrow">WRITING</p><h2><ProximityHeading client:load label="最近的记录" /></h2></div></div><div class="article-grid">{articles.map((article, index) => <article class="article-card"><div class={`article-illustration illustration-${index + 1}`}><span>{article.tag}</span></div><p class="meta">{article.date} · {article.minutes} 分钟阅读</p><h3>{article.title}</h3><p>{article.excerpt}</p><a class="text-button reveal-link" href={`/articles/${article.id}`}>阅读文章 ↗</a></article>)}</div><div class="detail-block"><p class="eyebrow">TOPICS I FOLLOW</p><div class="topic-grid"><span>前端工程化</span><span>交互与动效</span><span>产品思考</span><span>个人成长</span><span>设计灵感</span><span>AI 协作</span></div></div></section></BaseLayout>
+
+<BaseLayout title="文章｜个人星球">
+  <section class="section standalone-page">
+    <div class="section-heading">
+      <div>
+        <p class="eyebrow">WRITING</p>
+        <h2><ProximityHeading client:load label="最近的记录" /></h2>
+      </div>
+    </div>
+
+    {
+      loadError ? (
+        <p class="empty">文章暂时无法加载，请确认后端服务已经启动。</p>
+      ) : articles.length ? (
+        <div class="article-grid">
+          {articles.map((article, index) => (
+            <article class="article-card">
+              <div
+                class={`article-illustration illustration-${(index % 3) + 1}`}
+              >
+                <span>{article.tags[0]?.name ?? "文章"}</span>
+              </div>
+              <p class="meta">{formatDate(article.publishedAt)} · 阅读文章</p>
+              <h3>{article.title}</h3>
+              <p>{article.summary}</p>
+              <a
+                class="text-button reveal-link"
+                href={`/articles/${article.id}`}
+              >
+                阅读文章 →
+              </a>
+            </article>
+          ))}
+        </div>
+      ) : (
+        <p class="empty">暂时还没有已发布的文章。</p>
+      )
+    }
+
+    <div class="detail-block">
+      <p class="eyebrow">TOPICS I FOLLOW</p>
+      <div class="topic-grid">
+        <span>前端工程化</span><span>交互与动效</span><span>产品思考</span><span
+          >个人成长</span
+        ><span>设计灵感</span><span>AI 协作</span>
+      </div>
+    </div>
+  </section>
+</BaseLayout>

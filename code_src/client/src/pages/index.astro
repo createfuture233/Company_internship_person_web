@@ -1,10 +1,48 @@
 ---
-import BaseLayout from '../layouts/BaseLayout.astro'
-import ProximityHeading from '../components/ProximityHeading'
-import AdminPlanetLogin from '../components/AdminPlanetLogin'
+import BaseLayout from "../layouts/BaseLayout.astro";
+import ProximityHeading from "../components/ProximityHeading";
+import AdminPlanetLogin from "../components/AdminPlanetLogin";
 ---
+
 <BaseLayout>
-  <section class="hero"><div class="orb orb-one"></div><div class="orb orb-two"></div><div class="hero-copy"><p class="eyebrow">WELCOME TO MY LITTLE PLANET</p><h1><ProximityHeading client:load label="把生活的灵感 画进数字宇宙。" /></h1><p class="lead">你好，我是一名持续探索设计、代码与表达的人。这里收集我的作品、文章，以及尚未完成的想法。</p><a class="primary-button" href="/articles">开始漫游 ↓</a></div><div class="hero-art"><AdminPlanetLogin client:load /><div class="planet"><i></i><i></i><i></i></div><div class="orbit"><b>✦</b></div><p>2026<br />PERSONAL<br />PLANET</p></div></section>
-  <section class="content-band"><p class="eyebrow">TRANSMISSION LOG</p><h2><ProximityHeading client:load label="这个星球，正在缓慢生长。" /></h2><p>我把阅读、创作与技术实验留下来，作为下一次出发前可回望的坐标。</p><div class="stat-grid"><div><strong>03</strong><span>已发布文章</span></div><div><strong>02</strong><span>进行中作品</span></div><div><strong>∞</strong><span>待探索的灵感</span></div></div></section>
-  <section class="content-band home-links"><p class="eyebrow">EXPLORE NEXT</p><div class="explore-grid"><a href="/about"><span>01</span><h3>认识我</h3><p>关于经历、技能与正在探索的方向。</p><b>↗</b></a><a href="/projects"><span>02</span><h3>查看作品</h3><p>从想法到界面的实践记录。</p><b>↗</b></a></div></section>
+  <section class="hero">
+    <div class="orb orb-one"></div><div class="orb orb-two"></div><div
+      class="hero-copy"
+    >
+      <p class="eyebrow">WELCOME TO MY LITTLE PLANET</p><h1>
+        <ProximityHeading client:load label="把生活的灵感 画进数字宇宙。" />
+      </h1><p class="lead">
+        你好，我是一名持续探索设计、代码与表达的人。这里收集我的作品、文章，以及尚未完成的想法。
+      </p><a class="primary-button" href="/articles">开始漫游 ↓</a>
+    </div><div class="hero-art">
+      <AdminPlanetLogin client:load /><div class="planet">
+        <i></i><i></i><i></i>
+      </div><div class="orbit"><b>✦</b></div><p>
+        2026<br />PERSONAL<br />PLANET
+      </p>
+    </div>
+  </section>
+  <section class="content-band">
+    <p class="eyebrow">TRANSMISSION LOG</p><h2>
+      <ProximityHeading client:load label="这个星球，正在缓慢生长。" />
+    </h2><p>
+      我把阅读、创作与技术实验留下来，作为下一次出发前可回望的坐标。
+    </p><div class="stat-grid">
+      <div><strong>03</strong><span>已发布文章</span></div><div>
+        <strong>02</strong><span>进行中作品</span>
+      </div><div><strong>∞</strong><span>待探索的灵感</span></div>
+    </div>
+  </section>
+  <section class="content-band home-links">
+    <p class="eyebrow">EXPLORE NEXT</p><div class="explore-grid">
+      <a href="/about"
+        ><span>01</span><h3>认识我</h3><p>关于经历、技能与正在探索的方向。</p><b
+          >↗</b
+        ></a
+      ><a href="/projects"
+        ><span>02</span><h3>查看作品</h3><p>从想法到界面的实践记录。</p><b>↗</b
+        ></a
+      >
+    </div>
+  </section>
 </BaseLayout>

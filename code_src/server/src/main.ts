@@ -213,7 +213,7 @@ class AppController implements OnModuleInit {
   @Get('content/:type/:id')
   async getContent(@Param('type') type: ContentType, @Param('id') id: string) {
     const item = await this.prisma.content.findFirst({
-      where: { id, type, status: ContentStatus.published },
+      where: { type, status: ContentStatus.published, OR: [{ id }, { slug: id }] },
       include: { tags: true },
     })
     if (!item) throw new NotFoundException('Content not found')

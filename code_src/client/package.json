@@ -1,25 +1,27 @@
 {
-  "name": "client",
-  "private": true,
-  "version": "0.1.0",
-  "scripts": {
-    "dev": "astro dev",
-    "build": "astro check && astro build",
-    "preview": "astro preview"
-  },
-  "dependencies": {
-    "@astrojs/react": "^4.4.2",
-    "astro": "^7.1.0",
-    "lucide-react": "^0.468.0",
-    "motion": "^12.42.2",
-    "react": "19.2.7",
-    "react-dom": "19.2.7",
-    "typescript": "~5.8.3",
-    "vite": "^7.1.7"
-  },
-  "devDependencies": {
-    "@astrojs/check": "^0.9.9",
-    "@types/react": "^19.0.0",
-    "@types/react-dom": "^19.0.0"
-  }
+    "name":  "client",
+    "private":  true,
+    "version":  "0.1.0",
+    "scripts":  {
+                    "dev":  "astro dev",
+                    "build":  "astro check \u0026\u0026 astro build",
+                    "preview":  "astro preview",
+                    "start":  "node ./dist/server/entry.mjs"
+                },
+    "dependencies":  {
+                         "@astrojs/node":  "^11.0.2",
+                         "@astrojs/react":  "^4.4.2",
+                         "astro":  "^7.1.0",
+                         "lucide-react":  "^0.468.0",
+                         "motion":  "^12.42.2",
+                         "react":  "19.2.7",
+                         "react-dom":  "19.2.7",
+                         "typescript":  "~5.8.3",
+                         "vite":  "^7.1.7"
+                     },
+    "devDependencies":  {
+                            "@astrojs/check":  "^0.9.9",
+                            "@types/react":  "^19.0.0",
+                            "@types/react-dom":  "^19.0.0"
+                        }
 }

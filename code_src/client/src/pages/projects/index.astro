@@ -1,6 +1,77 @@
 ---
-import BaseLayout from '../../layouts/BaseLayout.astro'
-import ProximityHeading from '../../components/ProximityHeading'
-import { projects } from '../../data/content'
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import ProximityHeading from "../../components/ProximityHeading";
+import { apiBase } from "../../lib/api";
+
+type Project = {
+  id: string;
+  slug: string;
+  title: string;
+  summary: string;
+  stack: string | null;
+  tags: Array<{ name: string }>;
+};
+
+let projects: Project[] = [];
+let loadError = false;
+try {
+  const response = await fetch(`${apiBase}/projects`);
+  if (!response.ok) throw new Error("Unable to load projects");
+  projects = await response.json();
+} catch {
+  loadError = true;
+}
 ---
-<BaseLayout title="作品｜个人星球"><section class="section standalone-page"><div class="section-heading"><div><p class="eyebrow">SELECTED WORK</p><h2><ProximityHeading client:load label="正在生长的作品" /></h2></div><a class="text-button" href="/contact">一起合作 ↗</a></div><div class="project-grid">{projects.map((project, index) => <a class={`project-card project-${index + 1} reveal-link`} href={`/projects/${project.slug}`}><p>{project.type}</p><h3>{project.title}</h3><p>{project.desc}</p><span>{project.stack}</span></a>)}</div><div class="detail-block"><p class="eyebrow">HOW I BUILD</p><div class="process-grid"><article><span>01</span><h3>发现问题</h3><p>从真实使用场景开始，而不是从功能列表开始。</p></article><article><span>02</span><h3>设计路径</h3><p>将内容、交互和视觉组织为连贯体验。</p></article><article><span>03</span><h3>快速迭代</h3><p>通过可运行的原型不断验证与完善。</p></article></div></div></section></BaseLayout>
+
+<BaseLayout title="作品｜个人星球">
+  <section class="section standalone-page">
+    <div class="section-heading">
+      <div>
+        <p class="eyebrow">SELECTED WORK</p>
+        <h2><ProximityHeading client:load label="正在生长的作品" /></h2>
+      </div>
+      <a class="text-button" href="/contact">一起合作 →</a>
+    </div>
+
+    {
+      loadError ? (
+        <p class="empty">作品暂时无法加载，请确认后端服务已经启动。</p>
+      ) : projects.length ? (
+        <div class="project-grid">
+          {projects.map((project, index) => (
+            <a
+              class={`project-card project-${(index % 2) + 1} reveal-link`}
+              href={`/projects/${project.slug}`}
+            >
+              <p>{project.tags[0]?.name ?? "项目作品"}</p>
+              <h3>{project.title}</h3>
+              <p>{project.summary}</p>
+              <span>{project.stack ?? "持续迭代中"}</span>
+            </a>
+          ))}
+        </div>
+      ) : (
+        <p class="empty">暂时还没有已发布的作品。</p>
+      )
+    }
+
+    <div class="detail-block">
+      <p class="eyebrow">HOW I BUILD</p>
+      <div class="process-grid">
+        <article>
+          <span>01</span><h3>发现问题</h3><p>
+            从真实使用场景开始，而不是从功能列表开始。
+          </p>
+        </article><article>
+          <span>02</span><h3>设计路径</h3><p>
+            将内容、交互和视觉组织为连贯体验。
+          </p>
+        </article><article>
+          <span>03</span><h3>快速迭代</h3><p>
+            通过可运行的原型不断验证与完善。
+          </p>
+        </article>
+      </div>
+    </div>
+  </section>
+</BaseLayout>

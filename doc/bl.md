@@ -260,3 +260,10 @@ SQLite（内容、评论、会话、订阅等数据）
 - 正式内容、评论、管理员会话、联系表单和订阅数据以数据库接口返回结果为准；`client/src/data/` 仅用于静态展示或离线兜底。
 - `dist/`、`.astro/`、`node_modules/`、`.env` 和 `server/data/*.db` 属于生成文件、依赖或敏感运行数据，不提交 Git。
 - 后端业务继续增长时，应把现有接口逐步迁移为 `auth`、`contents`、`comments`、`admin` 等独立模块，避免把业务逻辑继续堆积在 `main.ts`。
+### 11.2 内容数据读取规范
+
+- 文章列表页面在每次请求时调用后端 `GET /api/articles`；作品列表页面调用 `GET /api/projects`。
+- 文章详情页调用 `GET /api/content/article/:id`；作品详情页调用 `GET /api/content/project/:slug`。作品接口同时支持以数据库 ID 或公开 slug 查询。
+- Astro 前端采用 Node 服务端渲染（SSR），因此管理员发布或修改内容后无需重新构建前端，刷新对应页面即可读取 SQLite 中的最新数据。
+- `client/src/data/content.ts` 不再作为公开文章和作品页面的数据源，仅可保留为开发期参考或离线兜底；后续可在确认不再需要后删除。
+- 生产环境需分别运行后端 NestJS 服务与前端 Astro 服务；前端通过 `PUBLIC_API_BASE` 指向后端 API 地址。
