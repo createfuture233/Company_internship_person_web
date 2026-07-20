@@ -22,7 +22,7 @@ import {
   ValidationPipe,
 } from '@nestjs/common'
 import { NestFactory } from '@nestjs/core'
-import { IsArray, IsEmail, IsIn, IsNotEmpty, MaxLength, ValidateNested } from 'class-validator'
+import { IsArray, IsEmail, IsIn, IsNotEmpty, IsOptional, MaxLength, ValidateNested } from 'class-validator'
 import { Type } from 'class-transformer'
 import { CommentStatus, ContentStatus, ContentType, Prisma } from '@prisma/client'
 import { PrismaModule, PrismaService } from './prisma/prisma.module'
@@ -54,18 +54,21 @@ class LoginDto {
   @IsNotEmpty() @MaxLength(120) password!: string
 }
 
-class CreateContentDto {
-  @IsIn(['article', 'project']) type!: ContentType
+class ContentFieldsDto {
   @IsNotEmpty() @MaxLength(120) title!: string
   @IsNotEmpty() @MaxLength(500) summary!: string
   @IsNotEmpty() @MaxLength(5000) body!: string
+  @IsOptional() @MaxLength(2000) coverUrl?: string
+  @IsOptional() @MaxLength(500) stack?: string
+  @IsIn(['draft', 'published', 'archived']) status!: ContentStatus
+  @IsArray() @IsOptional() @MaxLength(30, { each: true }) tags?: string[]
 }
 
-class UpdateContentDto {
-  @IsNotEmpty() @MaxLength(120) title!: string
-  @IsNotEmpty() @MaxLength(500) summary!: string
-  @IsNotEmpty() @MaxLength(5000) body!: string
+class CreateContentDto extends ContentFieldsDto {
+  @IsIn(['article', 'project']) type!: ContentType
 }
+
+class UpdateContentDto extends ContentFieldsDto {}
 class UpdateCommentStatusDto {
   @IsIn(['visible', 'hidden', 'spam']) status!: CommentStatus
 }
@@ -282,6 +285,7 @@ class AppController implements OnModuleInit {
   ) {
     const admin = await this.requireAdmin(authorization)
     const slug = newSlug(data.type)
+    const tags = [...new Set((data.tags ?? []).map((tag) => tag.trim()).filter(Boolean))]
     const item = await this.prisma.content.create({
       data: {
         type: data.type,
@@ -289,9 +293,13 @@ class AppController implements OnModuleInit {
         title: data.title.trim(),
         summary: data.summary.trim(),
         body: data.body.trim(),
-        status: ContentStatus.published,
-        publishedAt: new Date(),
+        coverUrl: data.coverUrl?.trim() || null,
+        stack: data.type === ContentType.project ? data.stack?.trim() || null : null,
+        status: data.status,
+        publishedAt: data.status === ContentStatus.published ? new Date() : null,
+        tags: { create: tags.map((name) => ({ name })) },
       },
+      include: { tags: true },
     })
     await this.audit(admin.id, 'create_content', 'content', item.id, { type: item.type, title: item.title })
     return item
@@ -307,9 +315,20 @@ class AppController implements OnModuleInit {
     const admin = await this.requireAdmin(authorization)
     const existing = await this.prisma.content.findFirst({ where: { id, type } })
     if (!existing) throw new NotFoundException('Content not found')
+    const tags = [...new Set((data.tags ?? []).map((tag) => tag.trim()).filter(Boolean))]
     const item = await this.prisma.content.update({
       where: { id },
-      data: { title: data.title.trim(), summary: data.summary.trim(), body: data.body.trim() },
+      data: {
+        title: data.title.trim(),
+        summary: data.summary.trim(),
+        body: data.body.trim(),
+        coverUrl: data.coverUrl?.trim() || null,
+        stack: type === ContentType.project ? data.stack?.trim() || null : null,
+        status: data.status,
+        publishedAt: data.status === ContentStatus.published ? existing.publishedAt ?? new Date() : existing.publishedAt,
+        tags: { deleteMany: {}, create: tags.map((name) => ({ name })) },
+      },
+      include: { tags: true },
     })
     await this.audit(admin.id, 'update_content', 'content', item.id, { title: item.title })
     return item
