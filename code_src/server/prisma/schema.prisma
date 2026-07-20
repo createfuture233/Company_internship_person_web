@@ -1,0 +1,147 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+enum ContentType {
+  article
+  project
+}
+
+enum ContentStatus {
+  draft
+  published
+  archived
+}
+
+enum CommentStatus {
+  visible
+  hidden
+  spam
+}
+
+model Admin {
+  id           Int            @id @default(autoincrement())
+  username     String         @unique
+  passwordHash String
+  role         String         @default("admin")
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+  sessions     AdminSession[]
+  auditLogs    AuditLog[]
+}
+
+model AdminSession {
+  id        Int       @id @default(autoincrement())
+  adminId   Int
+  tokenHash String    @unique
+  expiresAt DateTime
+  revokedAt DateTime?
+  createdAt DateTime  @default(now())
+  admin     Admin     @relation(fields: [adminId], references: [id], onDelete: Cascade)
+
+  @@index([adminId])
+  @@index([expiresAt])
+}
+
+model Content {
+  id          String          @id @default(cuid())
+  type        ContentType
+  slug        String          @unique
+  title       String
+  summary     String
+  body        String
+  coverUrl    String?
+  stack       String?
+  status      ContentStatus   @default(draft)
+  publishedAt DateTime?
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+  tags        ContentTag[]
+  comments    Comment[]
+
+  @@index([type, status, publishedAt])
+  @@index([updatedAt])
+}
+
+model ContentTag {
+  id        Int     @id @default(autoincrement())
+  contentId String
+  name      String
+  content   Content @relation(fields: [contentId], references: [id], onDelete: Cascade)
+
+  @@unique([contentId, name])
+  @@index([name])
+}
+
+model Comment {
+  id         String        @id @default(cuid())
+  contentId  String
+  nickname   String
+  avatarText String
+  body       String
+  likes      Int           @default(0)
+  status     CommentStatus @default(visible)
+  createdAt  DateTime      @default(now())
+  updatedAt  DateTime      @updatedAt
+  content    Content       @relation(fields: [contentId], references: [id], onDelete: Cascade)
+  likedBy    CommentLike[]
+
+  @@index([contentId, createdAt])
+  @@index([contentId, likes])
+  @@index([status])
+}
+
+model CommentLike {
+  id         Int      @id @default(autoincrement())
+  commentId  String
+  visitorKey String
+  createdAt  DateTime @default(now())
+  comment    Comment  @relation(fields: [commentId], references: [id], onDelete: Cascade)
+
+  @@unique([commentId, visitorKey])
+  @@index([visitorKey])
+}
+
+model ContactMessage {
+  id        Int      @id @default(autoincrement())
+  name      String
+  email     String
+  message   String
+  status    String   @default("unread")
+  createdAt DateTime @default(now())
+
+  @@index([status, createdAt])
+  @@index([email])
+}
+
+model Subscription {
+  id          Int       @id @default(autoincrement())
+  email       String    @unique
+  confirmedAt DateTime?
+  createdAt   DateTime  @default(now())
+}
+
+model SiteSetting {
+  key       String   @id
+  value     String
+  updatedAt DateTime @updatedAt
+}
+
+model AuditLog {
+  id         Int      @id @default(autoincrement())
+  adminId    Int
+  action     String
+  targetType String
+  targetId   String?
+  payload    String?
+  createdAt  DateTime @default(now())
+  admin      Admin    @relation(fields: [adminId], references: [id], onDelete: Cascade)
+
+  @@index([adminId, createdAt])
+  @@index([targetType, targetId])
+}
