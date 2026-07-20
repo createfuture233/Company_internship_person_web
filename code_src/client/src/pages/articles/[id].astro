@@ -1,7 +1,8 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro'
 import { articles } from '../../data/content'
+import Comments from '../../components/Comments'
 export function getStaticPaths() { return articles.map((article) => ({ params: { id: article.id }, props: { article } })) }
 const { article } = Astro.props
 ---
-<BaseLayout title={`${article.title}｜个人星球`}><article class="detail-page detail-reveal"><a class="back-link" href="/articles">← 返回文章列表</a><p class="eyebrow">{article.tag} · {article.date}</p><h1>{article.title}</h1><p class="detail-lead">{article.excerpt}</p><div class="detail-body"><p>一个想法真正开始成形，往往不是在写下结论的时候，而是在不断追问“它要为谁解决什么问题”的过程中。</p><h2>从问题开始</h2><p>我会先记录真实的使用情境、限制条件与希望达成的体验，再把它们拆分为可以逐步验证的小路径。这样，创作不会被复杂度淹没。</p><blockquote>让每个页面都有清晰的目的，也让每一次互动都拥有自然的反馈。</blockquote><p>当内容、视觉和技术被放在同一个坐标系中思考，细节才会逐渐成为整体的一部分。</p></div></article></BaseLayout>
+<BaseLayout title={`${article.title}｜个人星球`}><article class="detail-page detail-reveal"><a class="back-link" href="/articles">← 返回文章列表</a><p class="eyebrow">{article.tag} · {article.date}</p><h1>{article.title}</h1><p class="detail-lead">{article.excerpt}</p><div class="detail-body"><p>一个想法真正开始成形，往往不是在写下结论的时候，而是在不断追问“它要为谁解决什么问题”的过程中。</p><h2>从问题开始</h2><p>我会先记录真实的使用情境、限制条件与希望达成的体验，再把它们拆分为可以逐步验证的小路径。这样，创作不会被复杂度淹没。</p><blockquote>让每个页面都有清晰的目的，也让每一次互动都拥有自然的反馈。</blockquote><p>当内容、视觉和技术被放在同一个坐标系中思考，细节才会逐渐成为整体的一部分。</p></div><Comments client:load contentType="article" contentId={article.id} /></article></BaseLayout>
