@@ -222,7 +222,7 @@ npx prisma init --datasource-provider sqlite --schema server/prisma/schema.prism
 在 code_src/server/.env 写入：
 
 ~~~env
-DATABASE_URL="file:./data/personal-planet.db"
+DATABASE_URL="file:../data/personal-planet.db"
 ~~~
 
 说明：

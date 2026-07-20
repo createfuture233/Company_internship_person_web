@@ -20,6 +20,15 @@ type CommentsProps = {
 
 const apiBase = import.meta.env.PUBLIC_API_BASE ?? 'http://localhost:3000/api'
 
+function visitorKey() {
+  const key = 'personal-planet-visitor-key'
+  const existing = localStorage.getItem(key)
+  if (existing) return existing
+  const created = crypto.randomUUID()
+  localStorage.setItem(key, created)
+  return created
+}
+
 function formatDate(value: string) {
   return new Intl.DateTimeFormat('zh-CN', {
     dateStyle: 'medium',
@@ -92,7 +101,7 @@ export default function Comments({ contentType, contentId }: CommentsProps) {
     if (likedIds.has(id)) return
 
     try {
-      const response = await fetch(apiBase + '/comments/' + id + '/like', { method: 'POST' })
+      const response = await fetch(apiBase + '/comments/' + id + '/like', { method: 'POST', headers: { 'X-Visitor-Key': visitorKey() } })
       if (!response.ok) throw new Error('like failed')
       const updated = await response.json() as CommentItem
       setComments((current) => current

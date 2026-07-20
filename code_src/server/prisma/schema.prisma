@@ -27,25 +27,28 @@ enum CommentStatus {
 model Admin {
   id           Int            @id @default(autoincrement())
   username     String         @unique
-  passwordHash String
+  passwordHash String         @map("password_hash")
   role         String         @default("admin")
-  createdAt    DateTime       @default(now())
-  updatedAt    DateTime       @updatedAt
+  createdAt    DateTime       @default(now()) @map("created_at")
+  updatedAt    DateTime       @updatedAt @map("updated_at")
   sessions     AdminSession[]
   auditLogs    AuditLog[]
+
+  @@map("admins")
 }
 
 model AdminSession {
   id        Int       @id @default(autoincrement())
-  adminId   Int
-  tokenHash String    @unique
-  expiresAt DateTime
-  revokedAt DateTime?
-  createdAt DateTime  @default(now())
+  adminId   Int       @map("admin_id")
+  tokenHash String    @unique @map("token_hash")
+  expiresAt DateTime  @map("expires_at")
+  revokedAt DateTime? @map("revoked_at")
+  createdAt DateTime  @default(now()) @map("created_at")
   admin     Admin     @relation(fields: [adminId], references: [id], onDelete: Cascade)
 
   @@index([adminId])
   @@index([expiresAt])
+  @@map("admin_sessions")
 }
 
 model Content {
@@ -55,56 +58,60 @@ model Content {
   title       String
   summary     String
   body        String
-  coverUrl    String?
+  coverUrl    String?         @map("cover_url")
   stack       String?
   status      ContentStatus   @default(draft)
-  publishedAt DateTime?
-  createdAt   DateTime        @default(now())
-  updatedAt   DateTime        @updatedAt
+  publishedAt DateTime?       @map("published_at")
+  createdAt   DateTime        @default(now()) @map("created_at")
+  updatedAt   DateTime        @updatedAt @map("updated_at")
   tags        ContentTag[]
   comments    Comment[]
 
   @@index([type, status, publishedAt])
   @@index([updatedAt])
+  @@map("contents")
 }
 
 model ContentTag {
   id        Int     @id @default(autoincrement())
-  contentId String
+  contentId String  @map("content_id")
   name      String
   content   Content @relation(fields: [contentId], references: [id], onDelete: Cascade)
 
   @@unique([contentId, name])
   @@index([name])
+  @@map("content_tags")
 }
 
 model Comment {
   id         String        @id @default(cuid())
-  contentId  String
+  contentId  String        @map("content_id")
   nickname   String
-  avatarText String
+  avatarText String        @map("avatar_text")
   body       String
   likes      Int           @default(0)
   status     CommentStatus @default(visible)
-  createdAt  DateTime      @default(now())
-  updatedAt  DateTime      @updatedAt
+  createdAt  DateTime      @default(now()) @map("created_at")
+  updatedAt  DateTime      @updatedAt @map("updated_at")
   content    Content       @relation(fields: [contentId], references: [id], onDelete: Cascade)
   likedBy    CommentLike[]
 
   @@index([contentId, createdAt])
   @@index([contentId, likes])
   @@index([status])
+  @@map("comments")
 }
 
 model CommentLike {
   id         Int      @id @default(autoincrement())
-  commentId  String
-  visitorKey String
-  createdAt  DateTime @default(now())
+  commentId  String   @map("comment_id")
+  visitorKey String   @map("visitor_key")
+  createdAt  DateTime @default(now()) @map("created_at")
   comment    Comment  @relation(fields: [commentId], references: [id], onDelete: Cascade)
 
   @@unique([commentId, visitorKey])
   @@index([visitorKey])
+  @@map("comment_likes")
 }
 
 model ContactMessage {
@@ -113,35 +120,41 @@ model ContactMessage {
   email     String
   message   String
   status    String   @default("unread")
-  createdAt DateTime @default(now())
+  createdAt DateTime @default(now()) @map("created_at")
 
   @@index([status, createdAt])
   @@index([email])
+  @@map("contact_messages")
 }
 
 model Subscription {
   id          Int       @id @default(autoincrement())
   email       String    @unique
-  confirmedAt DateTime?
-  createdAt   DateTime  @default(now())
+  confirmedAt DateTime? @map("confirmed_at")
+  createdAt   DateTime  @default(now()) @map("created_at")
+
+  @@map("subscriptions")
 }
 
 model SiteSetting {
   key       String   @id
   value     String
-  updatedAt DateTime @updatedAt
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("site_settings")
 }
 
 model AuditLog {
   id         Int      @id @default(autoincrement())
-  adminId    Int
+  adminId    Int      @map("admin_id")
   action     String
-  targetType String
-  targetId   String?
+  targetType String   @map("target_type")
+  targetId   String?  @map("target_id")
   payload    String?
-  createdAt  DateTime @default(now())
+  createdAt  DateTime @default(now()) @map("created_at")
   admin      Admin    @relation(fields: [adminId], references: [id], onDelete: Cascade)
 
   @@index([adminId, createdAt])
   @@index([targetType, targetId])
+  @@map("audit_logs")
 }
