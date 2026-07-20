@@ -2,7 +2,9 @@
 import BaseLayout from '../../layouts/BaseLayout.astro'
 import { projects } from '../../data/content'
 import Comments from '../../components/Comments'
+import ContentLiveSync from '../../components/ContentLiveSync'
+import AdminDetailEdit from '../../components/AdminDetailEdit'
 export function getStaticPaths() { return projects.map((project) => ({ params: { slug: project.slug }, props: { project } })) }
 const { project } = Astro.props
 ---
-<BaseLayout title={`${project.title}｜个人星球`}><article class="detail-page detail-reveal"><a class="back-link" href="/projects">← 返回作品列表</a><p class="eyebrow">{project.type}</p><h1>{project.title}</h1><p class="detail-lead">{project.desc}</p><div class="detail-body"><h2>项目目标</h2><p>这个项目关注如何把信息、交互与视觉氛围组织成一个连贯的体验，并在持续迭代中保留可维护性。</p><div class="detail-spec"><span>技术栈</span><strong>{project.stack}</strong><span>状态</span><strong>持续迭代中</strong></div><h2>设计过程</h2><p>从页面结构、内容层级到动态反馈，每个环节都围绕“让访客愿意继续探索”这一目标展开。后续会继续补充案例、过程稿与实际成果。</p></div><Comments client:load contentType="project" contentId={project.slug} /></article></BaseLayout>
+<BaseLayout title={`${project.title}｜个人星球`}><article class="detail-page detail-reveal"><a class="back-link" href="/projects">← 返回作品列表</a><p class="eyebrow">{project.type}</p><h1 data-content-title>{project.title}</h1><p class="detail-lead" data-content-summary>{project.desc}</p><div class="detail-body"><h2>项目目标</h2><p data-content-body>这个项目关注如何把信息、交互与视觉氛围组织成一个连贯的体验，并在持续迭代中保留可维护性。</p><div class="detail-spec"><span>技术栈</span><strong>{project.stack}</strong><span>状态</span><strong>持续迭代中</strong></div><h2>设计过程</h2><p>从页面结构、内容层级到动态反馈，每个环节都围绕“让访客愿意继续探索”这一目标展开。后续会继续补充案例、过程稿与实际成果。</p></div><ContentLiveSync client:load type="project" id={project.slug} /><AdminDetailEdit client:load type="project" id={project.slug} /><Comments client:load contentType="project" contentId={project.slug} /></article></BaseLayout>
