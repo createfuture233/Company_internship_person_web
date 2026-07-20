@@ -36,7 +36,7 @@ export default function Navigation() {
     if (window.location.pathname === '/admin') window.location.href = '/'
   }
 
-  const navLinks = loggedIn ? [...links, { href: '/admin', label: '更改' }] : links
+  const navLinks = loggedIn ? [...links, { href: '/admin', label: '后台' }] : links
 
   return <nav className="nav">
     <a className="brand" href="/">个人<span>星球</span></a>

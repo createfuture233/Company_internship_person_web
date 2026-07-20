@@ -7,6 +7,7 @@ import {
   BadRequestException,
   Body,
   ConflictException,
+  Delete,
   Controller,
   Get,
   Headers,
@@ -21,7 +22,8 @@ import {
   ValidationPipe,
 } from '@nestjs/common'
 import { NestFactory } from '@nestjs/core'
-import { IsEmail, IsIn, IsNotEmpty, MaxLength } from 'class-validator'
+import { IsArray, IsEmail, IsIn, IsNotEmpty, MaxLength, ValidateNested } from 'class-validator'
+import { Type } from 'class-transformer'
 import { CommentStatus, ContentStatus, ContentType, Prisma } from '@prisma/client'
 import { PrismaModule, PrismaService } from './prisma/prisma.module'
 
@@ -63,6 +65,25 @@ class UpdateContentDto {
   @IsNotEmpty() @MaxLength(120) title!: string
   @IsNotEmpty() @MaxLength(500) summary!: string
   @IsNotEmpty() @MaxLength(5000) body!: string
+}
+class UpdateCommentStatusDto {
+  @IsIn(['visible', 'hidden', 'spam']) status!: CommentStatus
+}
+
+class UpdateMessageStatusDto {
+  @IsIn(['unread', 'read', 'replied', 'archived']) status!: string
+}
+
+class SettingItemDto {
+  @IsNotEmpty() @MaxLength(100) key!: string
+  @MaxLength(5000) value!: string
+}
+
+class UpdateSettingsDto {
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => SettingItemDto)
+  settings!: SettingItemDto[]
 }
 
 const initialContents = [
@@ -294,6 +315,118 @@ class AppController implements OnModuleInit {
     return item
   }
 
+  @Get('admin/overview')
+  async adminOverview(@Headers('authorization') authorization?: string) {
+    await this.requireAdmin(authorization)
+    const [articles, projects, comments, unreadMessages] = await Promise.all([
+      this.prisma.content.count({ where: { type: ContentType.article } }),
+      this.prisma.content.count({ where: { type: ContentType.project } }),
+      this.prisma.comment.count({ where: { status: CommentStatus.visible } }),
+      this.prisma.contactMessage.count({ where: { status: 'unread' } }),
+    ])
+    return { articles, projects, comments, unreadMessages }
+  }
+
+  @Delete('admin/content/:type/:id')
+  async deleteContent(
+    @Headers('authorization') authorization: string | undefined,
+    @Param('type') type: ContentType,
+    @Param('id') id: string,
+  ) {
+    const admin = await this.requireAdmin(authorization)
+    const item = await this.prisma.content.findFirst({ where: { id, type } })
+    if (!item) throw new NotFoundException('Content not found')
+    await this.prisma.content.delete({ where: { id } })
+    await this.audit(admin.id, 'delete_content', 'content', id, { title: item.title })
+    return { ok: true }
+  }
+
+  @Get('admin/comments')
+  async adminComments(
+    @Headers('authorization') authorization: string | undefined,
+    @Query('status') status?: CommentStatus,
+  ) {
+    await this.requireAdmin(authorization)
+    const where = status && ['visible', 'hidden', 'spam'].includes(status) ? { status } : {}
+    return this.prisma.comment.findMany({
+      where,
+      include: { content: { select: { title: true, type: true } } },
+      orderBy: { createdAt: 'desc' },
+    })
+  }
+
+  @Patch('admin/comments/:id')
+  async updateAdminComment(
+    @Headers('authorization') authorization: string | undefined,
+    @Param('id') id: string,
+    @Body() data: UpdateCommentStatusDto,
+  ) {
+    const admin = await this.requireAdmin(authorization)
+    const item = await this.prisma.comment.update({ where: { id }, data: { status: data.status } })
+    await this.audit(admin.id, 'update_comment_status', 'comment', id, { status: data.status })
+    return item
+  }
+
+  @Delete('admin/comments/:id')
+  async deleteAdminComment(@Headers('authorization') authorization: string | undefined, @Param('id') id: string) {
+    const admin = await this.requireAdmin(authorization)
+    await this.prisma.comment.delete({ where: { id } })
+    await this.audit(admin.id, 'delete_comment', 'comment', id)
+    return { ok: true }
+  }
+
+  @Get('admin/messages')
+  async adminMessages(
+    @Headers('authorization') authorization: string | undefined,
+    @Query('status') status?: string,
+  ) {
+    await this.requireAdmin(authorization)
+    return this.prisma.contactMessage.findMany({
+      where: status ? { status } : {},
+      orderBy: { createdAt: 'desc' },
+    })
+  }
+
+  @Patch('admin/messages/:id')
+  async updateAdminMessage(
+    @Headers('authorization') authorization: string | undefined,
+    @Param('id') id: string,
+    @Body() data: UpdateMessageStatusDto,
+  ) {
+    const admin = await this.requireAdmin(authorization)
+    const item = await this.prisma.contactMessage.update({ where: { id: Number(id) }, data: { status: data.status } })
+    await this.audit(admin.id, 'update_contact_status', 'contact_message', id, { status: data.status })
+    return item
+  }
+
+  @Delete('admin/messages/:id')
+  async deleteAdminMessage(@Headers('authorization') authorization: string | undefined, @Param('id') id: string) {
+    const admin = await this.requireAdmin(authorization)
+    await this.prisma.contactMessage.delete({ where: { id: Number(id) } })
+    await this.audit(admin.id, 'delete_contact_message', 'contact_message', id)
+    return { ok: true }
+  }
+
+  @Get('admin/settings')
+  async adminSettings(@Headers('authorization') authorization?: string) {
+    await this.requireAdmin(authorization)
+    return this.prisma.siteSetting.findMany({ orderBy: { key: 'asc' } })
+  }
+
+  @Patch('admin/settings')
+  async updateAdminSettings(
+    @Headers('authorization') authorization: string | undefined,
+    @Body() data: UpdateSettingsDto,
+  ) {
+    const admin = await this.requireAdmin(authorization)
+    const settings = await this.prisma.$transaction(data.settings.map((item) => this.prisma.siteSetting.upsert({
+      where: { key: item.key.trim() },
+      update: { value: item.value.trim() },
+      create: { key: item.key.trim(), value: item.value.trim() },
+    })))
+    await this.audit(admin.id, 'update_site_settings', 'site_setting', undefined, { keys: settings.map((item) => item.key) })
+    return settings
+  }
   @Get('comments')
   async getComments(
     @Query('contentType') contentType: ContentType,

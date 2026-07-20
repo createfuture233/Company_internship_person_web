@@ -14,7 +14,7 @@ const blankContent = (type: ContentType): ContentItem => ({
   body: '在这里填写详情正文。',
 })
 
-export default function AdminPanel() {
+export default function AdminPanel({ contentType }: { contentType?: ContentType }) {
   const [items, setItems] = useState<ContentItem[]>([])
   const [selectedKey, setSelectedKey] = useState('')
   const [form, setForm] = useState<ContentItem | null>(null)
@@ -34,10 +34,11 @@ export default function AdminPanel() {
         return response.json() as Promise<ContentItem[]>
       })
       .then((data) => {
-        setItems(data)
+        const scoped = contentType ? data.filter((item) => item.type === contentType) : data
+        setItems(scoped)
         const search = new URLSearchParams(window.location.search)
         const requestedKey = search.get('type') + ':' + search.get('id')
-        const preferred = data.find((item) => item.type + ':' + item.id === requestedKey) ?? data[0]
+        const preferred = scoped.find((item) => item.type + ':' + item.id === requestedKey) ?? data[0]
         if (preferred) {
           setSelectedKey(preferred.type + ':' + preferred.id)
           setForm({ ...preferred })
@@ -48,7 +49,7 @@ export default function AdminPanel() {
         localStorage.removeItem('personal-planet-admin-token')
         setStatus('登录状态已失效，请返回首页重新登录。')
       })
-  }, [])
+  }, [contentType])
 
   function chooseItem(key: string) {
     const next = items.find((item) => item.type + ':' + item.id === key)
@@ -102,7 +103,7 @@ export default function AdminPanel() {
 
   return <section className="admin-panel">
     <div className="admin-panel-head">
-      <div><p className="eyebrow">ADMIN CONSOLE</p><h1>更改内容</h1><p>左侧编辑，右侧会即时模拟文章或作品详情页的展示结果。</p></div>
+      <div><p className="eyebrow">ADMIN CONSOLE</p><h1>后台</h1><p>内容管理：左侧编辑，右侧会即时模拟文章或作品详情页的展示结果。</p></div>
       <label className="admin-content-select">编辑对象
         <select value={selectedKey} onChange={(event) => chooseItem(event.target.value)}>
           {!selectedKey && <option value="">新建内容（未保存）</option>}
