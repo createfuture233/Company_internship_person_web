@@ -102,7 +102,7 @@ const { title = '个人星球', description = '个人星球：记录作品、思
       const currentPath = window.location.pathname.replace(/\/$/, '') || '/'
       document.querySelectorAll<HTMLAnchorElement>('.nav .links a').forEach((link) => {
         const linkPath = link.pathname.replace(/\/$/, '') || '/'
-        const isCurrent = linkPath === currentPath
+        const isCurrent = linkPath === '/admin' ? currentPath === '/admin' || currentPath.startsWith('/admin/') : linkPath === currentPath
         link.classList.toggle('active', isCurrent)
         if (isCurrent) link.setAttribute('aria-current', 'page')
         else link.removeAttribute('aria-current')

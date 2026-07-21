@@ -33,15 +33,16 @@ export default function Navigation() {
     if (token) await fetch(apiBase + '/auth/logout', { method: 'POST', headers: { Authorization: 'Bearer ' + token } })
     localStorage.removeItem('personal-planet-admin-token')
     setLoggedIn(false)
-    if (window.location.pathname === '/admin') window.location.href = '/'
+    if (window.location.pathname === '/admin' || window.location.pathname.startsWith('/admin/')) window.location.href = '/'
   }
 
   const navLinks = loggedIn ? [...links, { href: '/admin', label: '后台' }] : links
+  const isActive = (href: string) => href === '/admin' ? current === '/admin' || current.startsWith('/admin/') : current === href
 
   return <nav className="nav">
     <a className="brand" href="/">个人<span>星球</span></a>
     <div className={open ? 'links open' : 'links'}>
-      {navLinks.map((link) => <a className={current === link.href ? 'active' : ''} aria-current={current === link.href ? 'page' : undefined} href={link.href} key={link.href} onClick={() => setOpen(false)}>{link.label}</a>)}
+      {navLinks.map((link) => <a className={isActive(link.href) ? 'active' : ''} aria-current={isActive(link.href) ? 'page' : undefined} href={link.href} key={link.href} onClick={() => setOpen(false)}>{link.label}</a>)}
     </div>
     <div className="nav-actions">
       {loggedIn && <button aria-label="退出管理员登录" className="icon-button admin-logout" onClick={() => void logout()}><LogOut size={17} /></button>}
