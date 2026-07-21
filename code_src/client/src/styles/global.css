@@ -2018,6 +2018,141 @@ main :is(h1, h2, h3, p, a, li):hover {
     min-height: 27rem;
   }
 }
+/* Markdown Content Styles */
+.markdown-content {
+  line-height: 1.85;
+  color: var(--ink);
+}
+
+.markdown-content h1 {
+  font-size: 2rem;
+  font-weight: 700;
+  margin: 2rem 0 1rem;
+  color: var(--ink);
+  border-bottom: 1px solid var(--line);
+  padding-bottom: .5rem;
+}
+
+.markdown-content h2 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin: 1.8rem 0 .8rem;
+  color: var(--ink);
+}
+
+.markdown-content h3 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin: 1.5rem 0 .6rem;
+  color: var(--ink);
+}
+
+.markdown-content h4, .markdown-content h5, .markdown-content h6 {
+  font-size: 1rem;
+  font-weight: 600;
+  margin: 1.2rem 0 .5rem;
+  color: var(--ink);
+}
+
+.markdown-content p {
+  margin: 1rem 0;
+  color: var(--ink);
+}
+
+.markdown-content strong {
+  font-weight: 600;
+  color: var(--cyan);
+}
+
+.markdown-content em {
+  font-style: italic;
+  color: var(--violet);
+}
+
+.markdown-content a {
+  color: var(--cyan);
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+  transition: border-color .2s ease;
+}
+
+.markdown-content a:hover {
+  border-bottom-color: var(--cyan);
+}
+
+.markdown-content ul, .markdown-content ol {
+  margin: 1rem 0;
+  padding-left: 1.5rem;
+}
+
+.markdown-content li {
+  margin: .5rem 0;
+}
+
+.markdown-content blockquote {
+  margin: 1.5rem 0;
+  padding: 1rem 1.5rem;
+  border-left: 3px solid var(--cyan);
+  background: color-mix(in srgb, var(--panel-solid) 80%, transparent);
+  border-radius: 0 .5rem .5rem 0;
+  color: var(--muted);
+  font-style: italic;
+}
+
+.markdown-content code {
+  padding: .2rem .4rem;
+  border-radius: .3rem;
+  background: color-mix(in srgb, var(--panel-solid) 90%, transparent);
+  font-family: 'DM Mono', monospace;
+  font-size: .9em;
+  color: var(--pink);
+}
+
+.markdown-content pre {
+  margin: 1.5rem 0;
+  padding: 1rem;
+  border-radius: .7rem;
+  background: var(--void);
+  overflow-x: auto;
+  border: 1px solid var(--line);
+}
+
+.markdown-content pre code {
+  padding: 0;
+  background: none;
+  color: var(--ink);
+}
+
+.markdown-content hr {
+  margin: 2rem 0;
+  border: none;
+  height: 1px;
+  background: var(--line);
+}
+
+.markdown-content table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1.5rem 0;
+}
+
+.markdown-content th, .markdown-content td {
+  padding: .7rem 1rem;
+  border: 1px solid var(--line);
+  text-align: left;
+}
+
+.markdown-content th {
+  background: color-mix(in srgb, var(--panel-solid) 80%, transparent);
+  font-weight: 600;
+}
+
+.markdown-content img {
+  max-width: 100%;
+  border-radius: .5rem;
+  margin: 1rem 0;
+}
+
 @media (max-width: 540px) {
   .visitor-ai-dock {
     top: auto;

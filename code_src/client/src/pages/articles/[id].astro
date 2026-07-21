@@ -4,6 +4,7 @@ export const prerender = false;
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import Comments from "../../components/Comments";
 import AdminDetailEdit from "../../components/AdminDetailEdit";
+import MarkdownRenderer from "../../components/MarkdownRenderer";
 import { apiBase } from "../../lib/api";
 
 const { id } = Astro.params;
@@ -32,7 +33,7 @@ const date = article.publishedAt
     <p class="eyebrow">{article.tags[0]?.name ?? "文章"} · {date}</p>
     <h1 data-content-title>{article.title}</h1>
     <p class="detail-lead" data-content-summary>{article.summary}</p>
-    <div class="detail-body"><p data-content-body>{article.body}</p></div>
+    <div class="detail-body"><MarkdownRenderer client:load content={article.body} /></div>
     <AdminDetailEdit client:load type="article" id={article.id} />
     <Comments client:load contentType="article" contentId={article.id} />
   </article>
