@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { Bot, Loader2, Send, X } from 'lucide-react'
 import { apiBase } from '../lib/api'
 import { aiPrompts } from '../lib/aiPrompts'
+import MarkdownRenderer from "./MarkdownRenderer";
 
 type ChatMessage = { id: string; sender: 'user' | 'assistant'; body: string }
 
@@ -69,7 +70,7 @@ export default function VisitorAiDockV2() {
         {!messages.length && <p className="visitor-ai-empty">{aiPrompts.visitor.emptyMessage}</p>}
         {messages.map((message) => <article key={message.id} className={message.sender}>
           <span>{message.sender === 'user' ? '你' : 'AI'}</span>
-          <p>{message.body}</p>
+          <MarkdownRenderer content={message.body} />
         </article>)}
         {loading && <article className="assistant"><span>AI</span><p><Loader2 className="admin-ai-spin" size={14} /> 正在整理回答...</p></article>}
       </div>

@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { Bot, FileUp, Loader2, MessageSquare, Save, Search, Send, ShieldCheck, Sparkles, Wand2 } from 'lucide-react'
 import { apiBase } from '../lib/api'
 import { aiPrompts } from '../lib/aiPrompts'
+import MarkdownRenderer from "./MarkdownRenderer";
 
 type ContentType = 'article' | 'project'
 type ContentItem = { id: string; type: ContentType; title: string; summary?: string; body?: string; status?: string }
@@ -234,7 +235,7 @@ export default function AdminAiSuiteV3() {
     {active === 'chat' && <div className="admin-ai-chat">
       <div className="admin-ai-messages">
         {!messages.length && <div className="admin-ai-empty"><Bot size={34} /><strong>{aiPrompts.admin.chatEmptyTitle}</strong><span>{aiPrompts.admin.chatEmptyDescription}</span></div>}
-        {messages.map((message) => <article className={`admin-ai-message ${message.sender}`} key={message.id}><span>{message.sender === 'user' ? '管理员' : 'AI 助手'}</span><p>{message.body}</p></article>)}
+        {messages.map((message) => <article className={`admin-ai-message ${message.sender}`} key={message.id}><span>{message.sender === 'user' ? '管理员' : 'AI 助手'}</span><MarkdownRenderer content={message.body} /></article>)}
         {busy === 'chat' && <article className="admin-ai-message assistant"><span>AI 助手</span><p><Loader2 className="admin-ai-spin" size={16} /> 正在思考...</p></article>}
         <div ref={bottomRef} />
       </div>

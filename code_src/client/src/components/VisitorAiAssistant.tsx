@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Bot, Loader2, MessageCircle, Send, X } from 'lucide-react'
 import { apiBase } from '../lib/api'
+import MarkdownRenderer from "./MarkdownRenderer";
 
 type ChatMessage = { id: string; sender: 'user' | 'assistant'; body: string }
 
@@ -59,7 +60,7 @@ export default function VisitorAiAssistant() {
       <div className="visitor-ai-head"><span><Bot size={18} />AI 导览</span><button type="button" onClick={() => setOpen(false)}><X size={16} /></button></div>
       <div className="visitor-ai-body">
         {!messages.length && <p className="visitor-ai-empty">可以问我：这个网站有哪些作品？这篇文章讲了什么？作者在探索什么方向？</p>}
-        {messages.map((message) => <article key={message.id} className={message.sender}><span>{message.sender === 'user' ? '你' : 'AI'}</span><p>{message.body}</p></article>)}
+        {messages.map((message) => <article key={message.id} className={message.sender}><span>{message.sender === 'user' ? '你' : 'AI'}</span><MarkdownRenderer content={message.body} /></article>)}
         {loading && <article className="assistant"><span>AI</span><p><Loader2 className="admin-ai-spin" size={14} /> 正在整理回答...</p></article>}
       </div>
       {notice && <p className="visitor-ai-notice">{notice}</p>}

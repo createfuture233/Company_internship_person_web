@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { Bot, Cpu, Loader2, Send, ShieldCheck, Sparkles } from 'lucide-react'
 import { apiBase } from '../lib/api'
+import MarkdownRenderer from "./MarkdownRenderer";
 
 type AiConfig = {
   configured: boolean
@@ -106,7 +107,7 @@ export default function AdminAiAssistant() {
           {!messages.length && <div className="admin-ai-empty"><Bot size={34} /><strong>先问我一个后台问题</strong><span>比如让 AI 分析内容结构、给文章选题，或者帮作品详情补充表达。</span></div>}
           {messages.map((message) => <article className={`admin-ai-message ${message.sender}`} key={message.id}>
             <span>{message.sender === 'user' ? '管理员' : 'AI 助手'}</span>
-            <p>{message.body}</p>
+            <MarkdownRenderer content={message.body} />
           </article>)}
           {loading && <article className="admin-ai-message assistant"><span>AI 助手</span><p><Loader2 className="admin-ai-spin" size={16} /> 正在思考…</p></article>}
           <div ref={bottomRef} />
