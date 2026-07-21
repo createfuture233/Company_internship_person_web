@@ -22,7 +22,7 @@ const project = (await response.json()) as {
 ---
 
 <BaseLayout title={`${project.title}｜个人星球`}>
-  <article class="detail-page detail-reveal">
+  <article class="detail-page detail-reveal" data-content-type="project" data-content-id={project.id}>
     <a class="back-link" href="/projects">← 返回作品列表</a>
     <p class="eyebrow">{project.tags[0]?.name ?? "项目作品"}</p>
     <h1 data-content-title>{project.title}</h1>

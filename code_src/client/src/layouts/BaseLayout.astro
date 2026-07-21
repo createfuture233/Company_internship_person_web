@@ -2,6 +2,7 @@
 import '../styles/global.css'
 import Navigation from '../components/Navigation'
 import Footer from '../components/Footer'
+import VisitorAiAssistant from '../components/VisitorAiAssistant'
 const { title = '个人星球', description = '个人星球：记录作品、思考与成长。' } = Astro.props
 ---
 <!doctype html>
@@ -15,6 +16,7 @@ const { title = '个人星球', description = '个人星球：记录作品、思
   <body>
     <Navigation client:load />
     <main><slot /></main>
+    <VisitorAiAssistant client:load />
     <Footer client:load />
     <button class="back-to-top" type="button" aria-label="Back to top" data-back-to-top><span>↑</span><i></i></button>
     <script>

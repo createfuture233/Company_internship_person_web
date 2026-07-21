@@ -1,25 +1,33 @@
-import { apiBase } from '../lib/api'
-import { useEffect } from 'react'
+import { apiBase } from "../lib/api";
+import { useEffect } from "react";
 
-type ContentType = 'article' | 'project'
+type ContentType = "article" | "project";
 
-export default function ContentLiveSync({ type, id }: { type: ContentType; id: string }) {
+export default function ContentLiveSync({
+  type,
+  id,
+}: {
+  type: ContentType;
+  id: string;
+}) {
   useEffect(() => {
-    fetch(apiBase + '/content/' + type + '/' + id)
-      .then((response) => response.ok ? response.json() : null)
+    fetch(apiBase + "/content/" + type + "/" + id)
+      .then((response) => (response.ok ? response.json() : null))
       .then((item: { title: string; summary: string; body: string } | null) => {
-        if (!item) return
-        const root = document.querySelector<HTMLElement>('.detail-page')
-        if (!root) return
-        const title = root.querySelector<HTMLElement>('[data-content-title]')
-        const summary = root.querySelector<HTMLElement>('[data-content-summary]')
-        const body = root.querySelector<HTMLElement>('[data-content-body]')
-        if (title) title.textContent = item.title
-        if (summary) summary.textContent = item.summary
-        if (body) body.textContent = item.body
+        if (!item) return;
+        const root = document.querySelector<HTMLElement>(".detail-page");
+        if (!root) return;
+        const title = root.querySelector<HTMLElement>("[data-content-title]");
+        const summary = root.querySelector<HTMLElement>(
+          "[data-content-summary]",
+        );
+        const body = root.querySelector<HTMLElement>("[data-content-body]");
+        if (title) title.textContent = item.title;
+        if (summary) summary.textContent = item.summary;
+        if (body) body.textContent = item.body;
       })
-      .catch(() => undefined)
-  }, [id, type])
+      .catch(() => undefined);
+  }, [id, type]);
 
-  return null
+  return null;
 }

@@ -4,8 +4,8 @@ CREATE TABLE ai_conversations (
   content_id TEXT,
   content_type TEXT CHECK (content_type IN ('article', 'project')),
   title TEXT,
-  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE ai_messages (
@@ -14,7 +14,7 @@ CREATE TABLE ai_messages (
   sender TEXT NOT NULL CHECK (sender IN ('user', 'assistant', 'system')),
   body TEXT NOT NULL,
   token_usage INTEGER,
-  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (conversation_id) REFERENCES ai_conversations(id) ON DELETE CASCADE
 );
 
@@ -27,7 +27,7 @@ CREATE TABLE ai_uploaded_files (
   parsed_text TEXT NOT NULL,
   parse_status TEXT NOT NULL DEFAULT 'pending' CHECK (parse_status IN ('pending', 'success', 'failed')),
   error_message TEXT,
-  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE ai_generations (
@@ -39,8 +39,8 @@ CREATE TABLE ai_generations (
   result_json TEXT NOT NULL,
   target_content_id TEXT,
   status TEXT NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'success', 'failed', 'saved')),
-  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (source_file_id) REFERENCES ai_uploaded_files(id) ON DELETE SET NULL
 );
 

@@ -27,7 +27,7 @@ const date = article.publishedAt
 ---
 
 <BaseLayout title={`${article.title}｜个人星球`}>
-  <article class="detail-page detail-reveal">
+  <article class="detail-page detail-reveal" data-content-type="article" data-content-id={article.id}>
     <a class="back-link" href="/articles">← 返回文章列表</a>
     <p class="eyebrow">{article.tags[0]?.name ?? "文章"} · {date}</p>
     <h1 data-content-title>{article.title}</h1>
