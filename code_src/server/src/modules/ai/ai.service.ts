@@ -1,11 +1,9 @@
 import { Injectable, Logger, ServiceUnavailableException } from '@nestjs/common'
+import { AiMessageSender, AiRoleScope, ContentType } from '@prisma/client'
 import { PrismaService } from '../../prisma/prisma.module'
 
-type AiRoleScope = 'visitor' | 'admin'
-type AiMessageSender = 'system' | 'user' | 'assistant'
-
 type DeepSeekMessage = {
-  role: AiMessageSender
+  role: 'system' | 'user' | 'assistant'
   content: string
 }
 
@@ -21,6 +19,11 @@ type DeepSeekConfig = {
   maxContextChars: number
   visitorRateLimit: number
   adminRateLimit: number
+}
+
+type DeepSeekChatResponse = {
+  choices?: Array<{ message?: { content?: string } }>
+  usage?: { total_tokens?: number }
 }
 
 @Injectable()
@@ -43,10 +46,14 @@ export class AiService {
     }
   }
 
+  assertReady() {
+    this.assertConfigured()
+  }
+
   async createConversation(input: {
     roleScope: AiRoleScope
     contentId?: string
-    contentType?: 'article' | 'project'
+    contentType?: ContentType
     title?: string
   }) {
     return this.prisma.aiConversation.create({
@@ -56,6 +63,13 @@ export class AiService {
         contentType: input.contentType ?? null,
         title: input.title?.trim() || null,
       },
+    })
+  }
+
+  async getAdminConversation(id: string) {
+    return this.prisma.aiConversation.findFirst({
+      where: { id, roleScope: AiRoleScope.admin },
+      include: { messages: { orderBy: { createdAt: 'asc' }, take: 20 } },
     })
   }
 
@@ -97,7 +111,23 @@ export class AiService {
       throw new ServiceUnavailableException('DeepSeek 调用失败，请稍后重试。')
     }
 
-    return response.json()
+    return response.json() as Promise<DeepSeekChatResponse>
+  }
+
+  getAssistantContent(response: DeepSeekChatResponse) {
+    const content = response.choices?.[0]?.message?.content?.trim()
+    if (!content) throw new ServiceUnavailableException('DeepSeek 没有返回有效内容。')
+    return content
+  }
+
+  getTokenUsage(response: DeepSeekChatResponse) {
+    return response.usage?.total_tokens
+  }
+
+  toDeepSeekMessages(messages: Array<{ sender: AiMessageSender; body: string }>): DeepSeekMessage[] {
+    return messages
+      .filter((message) => message.sender === AiMessageSender.user || message.sender === AiMessageSender.assistant)
+      .map((message) => ({ role: message.sender, content: this.clampContext(message.body) }))
   }
 
   clampContext(value: string) {
