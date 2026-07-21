@@ -12,6 +12,7 @@ import {
   Trash2,
 } from "lucide-react";
 import { apiBase } from "../lib/api";
+import MarkdownRenderer from "./MarkdownRenderer";
 
 type ContentType = "article" | "project";
 type ContentStatus = "draft" | "published" | "archived";
@@ -525,7 +526,7 @@ export default function AdminPanel({
             )}
             <div className="detail-body">
               <h2>{contentType === "article" ? "正文内容" : "项目说明"}</h2>
-              <p>{form.body || "这里将显示详情正文。"}</p>
+              <MarkdownRenderer content={form.body || "这里将显示详情正文。"} />
             </div>
           </article>
         </aside>

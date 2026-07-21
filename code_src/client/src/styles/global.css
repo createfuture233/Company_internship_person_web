@@ -380,7 +380,7 @@ body::before { animation:grid-drift 24s linear infinite; }
 .back-link { display:inline-block; margin-bottom:46px; color:var(--cyan); font:12px 'DM Mono',monospace; }
 .detail-page h1 { max-width:780px; margin:14px 0 22px; font:700 clamp(40px,6vw,72px)/1.18 'Noto Sans SC',sans-serif; letter-spacing:-3px; }
 .detail-lead { max-width:650px; color:var(--muted); font-size:18px; line-height:1.85; }
-.detail-body { max-width:690px; margin-top:55px; padding-top:42px; border-top:1px solid var(--line); }
+.detail-body { margin-top:55px; padding-top:42px; border-top:1px solid var(--line); }
 .detail-body p { color:var(--muted); font-size:16px; line-height:2; }
 .detail-body h2 { margin:48px 0 12px; font:600 27px 'Noto Sans SC',sans-serif; }
 .detail-body blockquote { margin:35px 0; padding:24px; color:var(--cyan); border-left:2px solid var(--cyan); background:#54e8ff0b; font:500 20px/1.7 'Noto Sans SC',sans-serif; }

@@ -274,7 +274,7 @@ export default function AdminAiSuiteV3() {
         <p>{generation.draft.summary}</p>
         {generation.draft.stack && <em>{generation.draft.stack}</em>}
         <div>{generation.draft.tags.map((tag) => <span key={tag}>#{tag}</span>)}</div>
-        <pre>{generation.draft.body}</pre>
+        <MarkdownRenderer content={generation.draft.body} />
         <div className="admin-ai-actions">
           <button type="button" disabled={savingDisabled} onClick={() => saveDraft('draft')}>{busy === 'save-draft' ? <Loader2 className="admin-ai-spin" size={16} /> : <Save size={16} />}保存为草稿</button>
           <button type="button" disabled={savingDisabled} onClick={() => saveDraft('published')}>{busy === 'save-published' ? <Loader2 className="admin-ai-spin" size={16} /> : <Save size={16} />}保存并发布</button>
@@ -289,7 +289,7 @@ export default function AdminAiSuiteV3() {
       <textarea rows={4} value={analysisPrompt} onChange={(event) => setAnalysisPrompt(event.target.value)} />
       <button className="admin-ai-primary" type="button" disabled={Boolean(busy) || !analysisContentId} onClick={analyze}>{busy === 'analyze' ? <Loader2 className="admin-ai-spin" size={17} /> : <Search size={17} />}{busy === 'analyze' ? '分析中...' : '开始分析'}</button>
       {busy === 'analyze' && <LoadingLine label="AI 正在分析内容..." />}
-      {analysis && <article className="admin-ai-analysis"><p>{analysis}</p></article>}
+      {analysis && <article className="admin-ai-analysis"><MarkdownRenderer content={analysis} /></article>}
     </div>}
   </section>
 }
