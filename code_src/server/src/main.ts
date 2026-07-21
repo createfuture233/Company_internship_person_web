@@ -26,6 +26,8 @@ import { IsArray, IsEmail, IsIn, IsNotEmpty, IsOptional, MaxLength, ValidateNest
 import { Type } from 'class-transformer'
 import { CommentStatus, ContentStatus, ContentType, Prisma } from '@prisma/client'
 import { PrismaModule, PrismaService } from './prisma/prisma.module'
+import { AiModule } from './modules/ai/ai.module'
+import { AiService } from './modules/ai/ai.service'
 
 config({ path: resolve(process.cwd(), 'server/.env') })
 config({ path: resolve(process.cwd(), '.env') })
@@ -148,7 +150,7 @@ function newSlug(type: ContentType) {
 
 @Controller('api')
 class AppController implements OnModuleInit {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(private readonly prisma: PrismaService, private readonly aiService: AiService) {}
 
   async onModuleInit() {
     const passwordHash = await bcrypt.hash(process.env.ADMIN_INITIAL_PASSWORD ?? '123456', 12)
@@ -272,6 +274,11 @@ class AppController implements OnModuleInit {
     return { ok: true }
   }
 
+  @Get('admin/ai/config')
+  async adminAiConfig(@Headers('authorization') authorization?: string) {
+    await this.requireAdmin(authorization)
+    return this.aiService.getStatus()
+  }
   @Get('admin/content')
   async adminContent(@Headers('authorization') authorization?: string) {
     await this.requireAdmin(authorization)
@@ -565,7 +572,7 @@ class AppController implements OnModuleInit {
 }
 
 @Module({
-  imports: [PrismaModule],
+  imports: [PrismaModule, AiModule],
   controllers: [AppController],
 })
 class AppModule {}
