@@ -1,4 +1,4 @@
-import { BarChart3, FileText, FolderKanban, Mail, MessageCircle, Settings } from 'lucide-react'
+import { BarChart3, Bot, FileText, FolderKanban, Mail, MessageCircle, Settings } from 'lucide-react'
 import { useEffect } from 'react'
 
 const links = [
@@ -7,6 +7,7 @@ const links = [
   { key: 'projects', href: '/admin/projects', label: '作品', icon: FolderKanban },
   { key: 'comments', href: '/admin/comments', label: '评论', icon: MessageCircle },
   { key: 'messages', href: '/admin/messages', label: '联系信息', icon: Mail },
+  { key: 'ai', href: '/admin/ai', label: 'AI 助手', icon: Bot },
   { key: 'settings', href: '/admin/settings', label: '网站设置', icon: Settings },
 ]
 

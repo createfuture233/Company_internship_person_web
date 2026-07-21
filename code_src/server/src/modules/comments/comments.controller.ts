@@ -5,6 +5,10 @@ import { PrismaService } from '../../prisma/prisma.module'
 
 type CommentSort = 'latest' | 'likes'
 
+function nowIso() {
+  return new Date().toISOString()
+}
+
 class CreateCommentDto {
   @IsIn(['article', 'project']) contentType!: ContentType
   @IsNotEmpty() @MaxLength(80) contentId!: string
@@ -61,6 +65,8 @@ export class CommentsController {
         nickname: data.name.trim(),
         avatarText: data.name.trim().slice(0, 2).toUpperCase(),
         body: data.content.trim(),
+        createdAt: nowIso(),
+        updatedAt: nowIso(),
       },
     })
     return {
@@ -80,8 +86,8 @@ export class CommentsController {
 
     try {
       const comment = await this.prisma.$transaction(async (tx) => {
-        await tx.commentLike.create({ data: { commentId: id, visitorKey } })
-        return tx.comment.update({ where: { id }, data: { likes: { increment: 1 } } })
+        await tx.commentLike.create({ data: { commentId: id, visitorKey, createdAt: nowIso() } })
+        return tx.comment.update({ where: { id }, data: { likes: { increment: 1 }, updatedAt: nowIso() } })
       })
       return { id: comment.id, likes: comment.likes }
     } catch (error) {

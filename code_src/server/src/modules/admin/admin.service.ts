@@ -12,7 +12,7 @@ export class AdminService {
       where: {
         tokenHash: this.tokenHash(token),
         revokedAt: null,
-        expiresAt: { gt: new Date() },
+        expiresAt: { gt: new Date().toISOString() },
       },
       include: { admin: true },
     })
@@ -22,7 +22,7 @@ export class AdminService {
 
   async createSession(adminId: number) {
     const token = randomBytes(36).toString('base64url')
-    const expiresAt = new Date(Date.now() + 1000 * 60 * 60 * 24 * 7)
+    const expiresAt = new Date(Date.now() + 1000 * 60 * 60 * 24 * 7).toISOString()
     await this.prisma.adminSession.create({ data: { adminId, tokenHash: this.tokenHash(token), expiresAt } })
     return { token, expiresAt }
   }
@@ -32,7 +32,7 @@ export class AdminService {
     if (!token) return
     await this.prisma.adminSession.updateMany({
       where: { tokenHash: this.tokenHash(token), revokedAt: null },
-      data: { revokedAt: new Date() },
+      data: { revokedAt: new Date().toISOString() },
     })
   }
 
@@ -44,6 +44,7 @@ export class AdminService {
         targetType,
         targetId,
         payload: payload ? JSON.stringify(payload) : null,
+        createdAt: new Date().toISOString(),
       },
     })
   }

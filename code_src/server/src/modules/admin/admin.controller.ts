@@ -48,6 +48,10 @@ function newSlug(type: ContentType) {
   return type + '-' + Date.now() + '-' + randomBytes(3).toString('hex')
 }
 
+function nowIso() {
+  return new Date().toISOString()
+}
+
 @Controller('api')
 export class AdminController {
   constructor(private readonly prisma: PrismaService, private readonly adminService: AdminService) {}
@@ -73,7 +77,9 @@ export class AdminController {
         coverUrl: data.coverUrl?.trim() || null,
         stack: data.type === ContentType.project ? data.stack?.trim() || null : null,
         status: data.status,
-        publishedAt: data.status === ContentStatus.published ? new Date() : null,
+        publishedAt: data.status === ContentStatus.published ? nowIso() : null,
+        createdAt: nowIso(),
+        updatedAt: nowIso(),
         tags: { create: tags.map((name) => ({ name })) },
       },
       include: { tags: true },
@@ -102,7 +108,8 @@ export class AdminController {
         coverUrl: data.coverUrl?.trim() || null,
         stack: type === ContentType.project ? data.stack?.trim() || null : null,
         status: data.status,
-        publishedAt: data.status === ContentStatus.published ? existing.publishedAt ?? new Date() : existing.publishedAt,
+        publishedAt: data.status === ContentStatus.published ? existing.publishedAt ?? nowIso() : existing.publishedAt,
+        updatedAt: nowIso(),
         tags: { deleteMany: {}, create: tags.map((name) => ({ name })) },
       },
       include: { tags: true },
@@ -161,7 +168,7 @@ export class AdminController {
   @Patch('admin/comments/:id')
   async updateAdminComment(@Headers('authorization') authorization: string | undefined, @Param('id') id: string, @Body() data: UpdateCommentStatusDto) {
     const admin = await this.adminService.requireAdmin(authorization)
-    const item = await this.prisma.comment.update({ where: { id }, data: { status: data.status } })
+    const item = await this.prisma.comment.update({ where: { id }, data: { status: data.status, updatedAt: nowIso() } })
     await this.adminService.audit(admin.id, 'update_comment_status', 'comment', id, { status: data.status })
     return item
   }
@@ -207,8 +214,8 @@ export class AdminController {
     const admin = await this.adminService.requireAdmin(authorization)
     const settings = await this.prisma.$transaction(data.settings.map((item) => this.prisma.siteSetting.upsert({
       where: { key: item.key.trim() },
-      update: { value: item.value.trim() },
-      create: { key: item.key.trim(), value: item.value.trim() },
+      update: { value: item.value.trim(), updatedAt: nowIso() },
+      create: { key: item.key.trim(), value: item.value.trim(), updatedAt: nowIso() },
     })))
     await this.adminService.audit(admin.id, 'update_site_settings', 'site_setting', undefined, { keys: settings.map((item) => item.key) })
     return settings

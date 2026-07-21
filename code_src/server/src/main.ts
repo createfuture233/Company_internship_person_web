@@ -5,8 +5,8 @@ import { config } from 'dotenv'
 import { resolve } from 'node:path'
 import { AppModule } from './app.module'
 
-config({ path: resolve(process.cwd(), 'server/.env') })
-config({ path: resolve(process.cwd(), '.env') })
+config({ path: resolve(process.cwd(), 'server/.env'), override: true })
+config({ path: resolve(process.cwd(), '.env'), override: true })
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule)

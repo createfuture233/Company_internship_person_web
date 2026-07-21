@@ -60,8 +60,8 @@ model Admin {
   username     String         @unique
   passwordHash String         @map("password_hash")
   role         String         @default("admin")
-  createdAt    DateTime       @default(now()) @map("created_at")
-  updatedAt    DateTime       @updatedAt @map("updated_at")
+  createdAt    String         @default(dbgenerated("CURRENT_TIMESTAMP")) @map("created_at")
+  updatedAt    String         @default(dbgenerated("CURRENT_TIMESTAMP")) @map("updated_at")
   sessions     AdminSession[]
   auditLogs    AuditLog[]
 
@@ -72,9 +72,9 @@ model AdminSession {
   id        Int       @id @default(autoincrement())
   adminId   Int       @map("admin_id")
   tokenHash String    @unique @map("token_hash")
-  expiresAt DateTime  @map("expires_at")
-  revokedAt DateTime? @map("revoked_at")
-  createdAt DateTime  @default(now()) @map("created_at")
+  expiresAt String    @map("expires_at")
+  revokedAt String?   @map("revoked_at")
+  createdAt String    @default(dbgenerated("CURRENT_TIMESTAMP")) @map("created_at")
   admin     Admin     @relation(fields: [adminId], references: [id], onDelete: Cascade)
 
   @@index([adminId])
@@ -92,9 +92,9 @@ model Content {
   coverUrl    String?       @map("cover_url")
   stack       String?
   status      ContentStatus @default(draft)
-  publishedAt DateTime?     @map("published_at")
-  createdAt   DateTime      @default(now()) @map("created_at")
-  updatedAt   DateTime      @updatedAt @map("updated_at")
+  publishedAt String?        @map("published_at")
+  createdAt   String         @default(dbgenerated("CURRENT_TIMESTAMP")) @map("created_at")
+  updatedAt   String         @default(dbgenerated("CURRENT_TIMESTAMP")) @map("updated_at")
   tags        ContentTag[]
   comments    Comment[]
 
@@ -122,8 +122,8 @@ model Comment {
   body       String
   likes      Int           @default(0)
   status     CommentStatus @default(visible)
-  createdAt  DateTime      @default(now()) @map("created_at")
-  updatedAt  DateTime      @updatedAt @map("updated_at")
+  createdAt  String        @default(dbgenerated("CURRENT_TIMESTAMP")) @map("created_at")
+  updatedAt  String        @default(dbgenerated("CURRENT_TIMESTAMP")) @map("updated_at")
   content    Content       @relation(fields: [contentId], references: [id], onDelete: Cascade)
   likedBy    CommentLike[]
 
@@ -137,7 +137,7 @@ model CommentLike {
   id         Int      @id @default(autoincrement())
   commentId  String   @map("comment_id")
   visitorKey String   @map("visitor_key")
-  createdAt  DateTime @default(now()) @map("created_at")
+  createdAt  String   @default(dbgenerated("CURRENT_TIMESTAMP")) @map("created_at")
   comment    Comment  @relation(fields: [commentId], references: [id], onDelete: Cascade)
 
   @@unique([commentId, visitorKey])
@@ -151,7 +151,7 @@ model ContactMessage {
   email     String
   message   String
   status    String   @default("unread")
-  createdAt DateTime @default(now()) @map("created_at")
+  createdAt String   @default(dbgenerated("CURRENT_TIMESTAMP")) @map("created_at")
 
   @@index([status, createdAt])
   @@index([email])
@@ -161,8 +161,8 @@ model ContactMessage {
 model Subscription {
   id          Int       @id @default(autoincrement())
   email       String    @unique
-  confirmedAt DateTime? @map("confirmed_at")
-  createdAt   DateTime  @default(now()) @map("created_at")
+  confirmedAt String?   @map("confirmed_at")
+  createdAt   String    @default(dbgenerated("CURRENT_TIMESTAMP")) @map("created_at")
 
   @@map("subscriptions")
 }
@@ -170,7 +170,7 @@ model Subscription {
 model SiteSetting {
   key       String   @id
   value     String
-  updatedAt DateTime @updatedAt @map("updated_at")
+  updatedAt String   @default(dbgenerated("CURRENT_TIMESTAMP")) @map("updated_at")
 
   @@map("site_settings")
 }
@@ -182,7 +182,7 @@ model AuditLog {
   targetType String   @map("target_type")
   targetId   String?  @map("target_id")
   payload    String?
-  createdAt  DateTime @default(now()) @map("created_at")
+  createdAt  String   @default(dbgenerated("CURRENT_TIMESTAMP")) @map("created_at")
   admin      Admin    @relation(fields: [adminId], references: [id], onDelete: Cascade)
 
   @@index([adminId, createdAt])
@@ -196,8 +196,8 @@ model AiConversation {
   contentId   String?      @map("content_id")
   contentType ContentType? @map("content_type")
   title       String?
-  createdAt   DateTime     @default(now()) @map("created_at")
-  updatedAt   DateTime     @updatedAt @map("updated_at")
+  createdAt   String       @default(dbgenerated("CURRENT_TIMESTAMP")) @map("created_at")
+  updatedAt   String       @default(dbgenerated("CURRENT_TIMESTAMP")) @map("updated_at")
   messages    AiMessage[]
 
   @@index([roleScope, updatedAt])
@@ -211,7 +211,7 @@ model AiMessage {
   sender         AiMessageSender
   body           String
   tokenUsage     Int?            @map("token_usage")
-  createdAt      DateTime        @default(now()) @map("created_at")
+  createdAt      String          @default(dbgenerated("CURRENT_TIMESTAMP")) @map("created_at")
   conversation   AiConversation  @relation(fields: [conversationId], references: [id], onDelete: Cascade)
 
   @@index([conversationId, createdAt])
@@ -227,7 +227,7 @@ model AiUploadedFile {
   parsedText   String            @map("parsed_text")
   parseStatus  AiFileParseStatus @default(pending) @map("parse_status")
   errorMessage String?           @map("error_message")
-  createdAt    DateTime          @default(now()) @map("created_at")
+  createdAt    String            @default(dbgenerated("CURRENT_TIMESTAMP")) @map("created_at")
   generations  AiGeneration[]
 
   @@index([parseStatus, createdAt])
@@ -243,8 +243,8 @@ model AiGeneration {
   resultJson      String             @map("result_json")
   targetContentId String?            @map("target_content_id")
   status          AiGenerationStatus @default(pending)
-  createdAt       DateTime           @default(now()) @map("created_at")
-  updatedAt       DateTime           @updatedAt @map("updated_at")
+  createdAt       String             @default(dbgenerated("CURRENT_TIMESTAMP")) @map("created_at")
+  updatedAt       String             @default(dbgenerated("CURRENT_TIMESTAMP")) @map("updated_at")
   sourceFile      AiUploadedFile?    @relation(fields: [sourceFileId], references: [id], onDelete: SetNull)
 
   @@index([generationType, status, createdAt])

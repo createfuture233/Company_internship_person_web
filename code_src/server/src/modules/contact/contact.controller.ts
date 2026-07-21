@@ -12,6 +12,10 @@ class SubscribeDto {
   @IsEmail() email!: string
 }
 
+function nowIso() {
+  return new Date().toISOString()
+}
+
 @Controller('api')
 export class ContactController {
   constructor(private readonly prisma: PrismaService) {}
@@ -19,7 +23,7 @@ export class ContactController {
   @Post('contact')
   async contact(@Body() data: ContactDto) {
     const message = await this.prisma.contactMessage.create({
-      data: { name: data.name.trim(), email: data.email.toLowerCase(), message: data.message.trim() },
+      data: { name: data.name.trim(), email: data.email.toLowerCase(), message: data.message.trim(), createdAt: nowIso() },
     })
     return { ok: true, id: message.id, message: '消息已收到。' }
   }
@@ -27,7 +31,7 @@ export class ContactController {
   @Post('subscriptions')
   async subscribe(@Body() data: SubscribeDto) {
     const email = data.email.toLowerCase()
-    const subscription = await this.prisma.subscription.upsert({ where: { email }, update: {}, create: { email } })
+    const subscription = await this.prisma.subscription.upsert({ where: { email }, update: {}, create: { email, createdAt: nowIso() } })
     return { ok: true, email: subscription.email }
   }
 }

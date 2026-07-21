@@ -26,6 +26,10 @@ type DeepSeekChatResponse = {
   usage?: { total_tokens?: number }
 }
 
+function nowIso() {
+  return new Date().toISOString()
+}
+
 @Injectable()
 export class AiService {
   private readonly logger = new Logger(AiService.name)
@@ -62,6 +66,8 @@ export class AiService {
         contentId: input.contentId ?? null,
         contentType: input.contentType ?? null,
         title: input.title?.trim() || null,
+        createdAt: nowIso(),
+        updatedAt: nowIso(),
       },
     })
   }
@@ -85,6 +91,7 @@ export class AiService {
         sender: input.sender,
         body: input.body,
         tokenUsage: input.tokenUsage ?? null,
+        createdAt: nowIso(),
       },
     })
   }

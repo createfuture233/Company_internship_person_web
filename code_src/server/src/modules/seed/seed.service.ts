@@ -53,11 +53,20 @@ export class SeedService implements OnModuleInit {
   constructor(private readonly prisma: PrismaService) {}
 
   async onModuleInit() {
+    const now = new Date().toISOString()
     const passwordHash = await bcrypt.hash(process.env.ADMIN_INITIAL_PASSWORD ?? '123456', 12)
-    await this.prisma.admin.upsert({ where: { username: 'admin' }, update: {}, create: { username: 'admin', passwordHash, role: 'admin' } })
+    await this.prisma.admin.upsert({
+      where: { username: 'admin' },
+      update: { passwordHash, updatedAt: now },
+      create: { username: 'admin', passwordHash, role: 'admin', createdAt: now, updatedAt: now },
+    })
 
     for (const item of initialContents) {
-      await this.prisma.content.upsert({ where: { id: item.id }, update: {}, create: { ...item, status: ContentStatus.published, publishedAt: new Date() } })
+      await this.prisma.content.upsert({
+        where: { id: item.id },
+        update: {},
+        create: { ...item, status: ContentStatus.published, publishedAt: now, createdAt: now, updatedAt: now },
+      })
     }
 
     const commentSeeds = [
@@ -67,7 +76,11 @@ export class SeedService implements OnModuleInit {
     ]
 
     for (const comment of commentSeeds) {
-      await this.prisma.comment.upsert({ where: { id: comment.id }, update: {}, create: { ...comment, status: CommentStatus.visible } })
+      await this.prisma.comment.upsert({
+        where: { id: comment.id },
+        update: {},
+        create: { ...comment, status: CommentStatus.visible, createdAt: now, updatedAt: now },
+      })
     }
   }
 }
