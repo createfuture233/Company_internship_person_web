@@ -4,6 +4,7 @@ export const prerender = false;
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import Comments from "../../components/Comments";
 import AdminDetailEdit from "../../components/AdminDetailEdit";
+import MarkdownRenderer from "../../components/MarkdownRenderer";
 import { apiBase } from "../../lib/api";
 
 const { slug } = Astro.params;
@@ -29,7 +30,7 @@ const project = (await response.json()) as {
     <p class="detail-lead" data-content-summary>{project.summary}</p>
     <div class="detail-body">
       <h2>项目内容</h2>
-      <p data-content-body>{project.body}</p>
+      <MarkdownRenderer client:load content={project.body} />
       <div class="detail-spec">
         <span>技术栈</span><strong>{project.stack ?? "持续迭代中"}</strong><span
           >状态</span
