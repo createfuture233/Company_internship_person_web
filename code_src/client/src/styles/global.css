@@ -1645,6 +1645,63 @@ main :is(h1, h2, h3, p, a, li):hover {
   outline: none;
 }
 .admin-ai-card textarea { resize: vertical; line-height: 1.75; }
+.admin-ai-file-picker {
+  display: flex;
+  align-items: center;
+  gap: .85rem;
+  width: 100%;
+  border: 1px solid var(--line);
+  border-radius: .95rem;
+  padding: .45rem .5rem .45rem .45rem;
+  color: var(--ink);
+  background: var(--surface);
+  font: inherit;
+  outline: none;
+  cursor: pointer;
+  transition: border-color .2s ease, box-shadow .2s ease;
+}
+.admin-ai-file-picker:hover:not(.disabled) {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent) 14%, transparent);
+}
+.admin-ai-file-picker.disabled {
+  opacity: .55;
+  cursor: not-allowed;
+}
+.admin-ai-file-picker-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: .45rem;
+  padding: .55rem .85rem;
+  border-radius: .7rem;
+  color: white;
+  background: var(--accent);
+  font-weight: 800;
+  white-space: nowrap;
+  flex-shrink: 0;
+  transition: transform .2s ease, box-shadow .2s ease;
+}
+.admin-ai-file-picker:hover:not(.disabled) .admin-ai-file-picker-btn {
+  transform: translateY(-1px);
+  box-shadow: 0 .6rem 1.2rem color-mix(in srgb, var(--accent) 28%, transparent);
+}
+.admin-ai-file-picker-name {
+  min-width: 0;
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--muted);
+  padding-right: .4rem;
+}
+.admin-ai-file-picker input[type='file'] {
+  display: none !important;
+  position: absolute;
+  width: 0;
+  height: 0;
+  opacity: 0;
+  pointer-events: none;
+}
 .admin-ai-fields {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -1850,6 +1907,7 @@ main :is(h1, h2, h3, p, a, li):hover {
 @keyframes aiPulse { to { transform: scale(1.35); opacity: 0; } }
 @keyframes aiPanelIn { from { opacity: 0; transform: translateY(.8rem) scale(.96); } to { opacity: 1; transform: translateY(0) scale(1); } }
 :root[data-theme='dark'] .admin-ai-card,
+:root[data-theme='dark'] .admin-ai-file-picker,
 :root[data-theme='dark'] .admin-ai-card input[type='file'],
 :root[data-theme='dark'] .admin-ai-card select,
 :root[data-theme='dark'] .admin-ai-card textarea,

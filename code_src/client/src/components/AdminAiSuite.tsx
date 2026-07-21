@@ -52,6 +52,7 @@ export default function AdminAiSuiteV3() {
   const [chatInput, setChatInput] = useState('')
   const bottomRef = useRef<HTMLDivElement | null>(null)
   const [uploaded, setUploaded] = useState<UploadedFile | null>(null)
+  const [selectedFileName, setSelectedFileName] = useState('')
   const [fileAnalysis, setFileAnalysis] = useState('')
   const [generateType, setGenerateType] = useState<ContentType>('article')
   const [generatePrompt, setGeneratePrompt] = useState(aiPrompts.admin.defaultGenerate)
@@ -124,6 +125,7 @@ export default function AdminAiSuiteV3() {
     setFileAnalysis('')
     setGeneration(null)
     setSavedGenerationId('')
+    setSelectedFileName(file.name)
     setBusy('upload')
     try {
       const text = await readTextFile(file)
@@ -249,7 +251,11 @@ export default function AdminAiSuiteV3() {
     {active === 'upload' && <div className="admin-ai-card">
       <h2>上传并解析文件</h2>
       <p>支持 .txt、.md、.csv、.json 等文本类文件。上传后会显示解析内容，并自动追加 AI 对文件的分析。</p>
-      <input type="file" accept=".txt,.md,.csv,.json,.log,text/*,application/json" disabled={Boolean(busy)} onChange={(event) => uploadFile(event.target.files?.[0])} />
+      <label className={`admin-ai-file-picker ${Boolean(busy) ? 'disabled' : ''}`}>
+        <span className="admin-ai-file-picker-btn"><FileUp size={17} />选择文件</span>
+        <span className="admin-ai-file-picker-name">{selectedFileName || '未选择文件'}</span>
+        <input type="file" accept=".txt,.md,.csv,.json,.log,text/*,application/json" disabled={Boolean(busy)} onChange={(event) => uploadFile(event.target.files?.[0])} />
+      </label>
       {busy === 'upload' && <LoadingLine label="正在读取并上传文件..." />}
       {uploaded && <div className="admin-ai-preview"><strong>{uploaded.originalName}</strong><span>{uploaded.fileSize} bytes</span><p>{uploaded.parsedText.slice(0, 1200)}</p></div>}
       {busy === 'file-analysis' && <LoadingLine label="AI 正在分析这个文件，请稍等..." />}
