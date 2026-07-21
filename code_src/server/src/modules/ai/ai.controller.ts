@@ -98,6 +98,43 @@ export class AiController {
     return file
   }
 
+  @Post('admin/ai/files/:id/analyze')
+  async analyzeUploadedFile(@Headers('authorization') authorization: string | undefined, @Param('id') id: string) {
+    const admin = await this.adminService.requireAdmin(authorization)
+    this.aiService.assertRateLimit(AiRoleScope.admin, String(admin.id))
+    const file = await this.prisma.aiUploadedFile.findUnique({ where: { id } })
+    if (!file) throw new NotFoundException('上传文件不存在。')
+
+    const response = await this.aiService.chat([
+      {
+        role: 'system',
+        content: [
+          '你是个人网站后台的文件分析助手。',
+          '请基于上传文件内容，输出简洁清晰的中文分析。',
+          '分析必须包含：核心主题、可生成文章方向、可生成作品方向、建议标签、需要管理员补充的信息。',
+        ].join('\n'),
+      },
+      {
+        role: 'user',
+        content: `文件名：${file.originalName}\n\n文件内容：\n${this.aiService.clampContext(file.parsedText, 0.8)}`,
+      },
+    ], { temperature: 0.55, maxTokens: 1400 })
+    const answer = this.aiService.getAssistantContent(response)
+    const generation = await this.prisma.aiGeneration.create({
+      data: {
+        generationType: AiGenerationType.analysis,
+        sourceFileId: file.id,
+        prompt: `分析上传文件：${file.originalName}`,
+        resultJson: JSON.stringify({ answer }),
+        status: AiGenerationStatus.success,
+        createdAt: nowIso(),
+        updatedAt: nowIso(),
+      },
+    })
+    await this.adminService.audit(admin.id, 'ai_analyze_file', 'ai_generation', generation.id, { fileId: file.id })
+    return { generation, answer, usage: { totalTokens: this.aiService.getTokenUsage(response) ?? null } }
+  }
+
   @Post('admin/ai/generate')
   async generateContent(@Headers('authorization') authorization: string | undefined, @Body() data: AiGenerateDto) {
     const admin = await this.adminService.requireAdmin(authorization)

@@ -2034,3 +2034,158 @@ main :is(h1, h2, h3, p, a, li):hover {
     animation: aiPanelIn .24s ease both;
   }
 }
+
+/* AI workbench: keep generated text and inputs stable on hover */
+.admin-ai-safe-zone :is(h1, h2, h3, p, li, span, strong, em, label, pre):hover,
+.admin-ai-safe-zone :is(input, textarea, select):hover,
+.admin-ai-safe-zone :is(input, textarea, select):focus,
+.visitor-ai :is(p, span, input):hover,
+.visitor-ai :is(input):focus {
+  color: inherit;
+  letter-spacing: inherit;
+  text-shadow: none;
+  transform: none;
+}
+
+.admin-ai-safe-zone :is(input, textarea, select),
+.visitor-ai :is(input) {
+  transition: border-color .2s ease, box-shadow .2s ease, background .2s ease;
+}
+
+.admin-ai-safe-zone :is(input, textarea, select):focus,
+.visitor-ai :is(input):focus {
+  border-color: color-mix(in srgb, var(--accent) 58%, var(--line));
+  box-shadow: 0 0 0 .22rem color-mix(in srgb, var(--accent) 16%, transparent);
+}
+
+.admin-ai-loading {
+  display: flex;
+  align-items: center;
+  gap: .7rem;
+  width: 100%;
+  padding: .82rem 1rem;
+  border: 1px solid color-mix(in srgb, var(--accent) 24%, var(--line));
+  border-radius: 1rem;
+  color: var(--muted);
+  background:
+    linear-gradient(135deg, color-mix(in srgb, var(--surface) 92%, white), color-mix(in srgb, var(--accent) 8%, var(--surface)));
+}
+
+.admin-ai-loading span {
+  white-space: nowrap;
+  font-size: .92rem;
+  font-weight: 800;
+}
+
+.admin-ai-loading i {
+  position: relative;
+  flex: 1;
+  min-width: 5rem;
+  height: .38rem;
+  overflow: hidden;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--line) 76%, transparent);
+}
+
+.admin-ai-loading i::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  width: 42%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, transparent, var(--accent), transparent);
+  animation: aiLoadingBar 1.15s ease-in-out infinite;
+}
+
+.admin-ai-spin {
+  animation: aiSpin .85s linear infinite;
+}
+
+.admin-ai-oneclick {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .7rem;
+  margin-top: .95rem;
+}
+
+.admin-ai-oneclick button,
+.admin-ai-actions button,
+.admin-ai-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: .45rem;
+}
+
+.admin-ai-oneclick button {
+  border: 1px solid color-mix(in srgb, var(--accent) 48%, var(--line));
+  border-radius: 999px;
+  padding: .78rem 1rem;
+  color: var(--ink);
+  background:
+    radial-gradient(circle at 20% 10%, color-mix(in srgb, var(--accent) 24%, transparent), transparent 34%),
+    var(--surface);
+  cursor: pointer;
+  box-shadow: 0 .8rem 1.5rem color-mix(in srgb, var(--accent) 13%, transparent);
+  transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease;
+}
+
+.admin-ai-oneclick button:hover:not(:disabled) {
+  transform: translateY(-.16rem);
+  border-color: var(--accent);
+  box-shadow: 0 1rem 2rem color-mix(in srgb, var(--accent) 22%, transparent);
+}
+
+.admin-ai-oneclick button:disabled,
+.admin-ai-actions button:disabled,
+.admin-ai-primary:disabled {
+  cursor: not-allowed;
+  opacity: .55;
+  transform: none;
+}
+
+.admin-ai-saved-tip {
+  margin: .9rem 0 0;
+  padding: .75rem .9rem;
+  border: 1px solid color-mix(in srgb, var(--accent) 28%, var(--line));
+  border-radius: .95rem;
+  color: var(--muted);
+  background: color-mix(in srgb, var(--accent) 8%, var(--surface));
+}
+
+:root[data-theme='dark'] .admin-ai-loading {
+  background:
+    linear-gradient(135deg, rgba(8, 14, 28, .92), rgba(31, 42, 71, .8));
+  border-color: rgba(74, 225, 255, .22);
+}
+
+:root[data-theme='dark'] .admin-ai-loading i {
+  background: rgba(255, 255, 255, .12);
+}
+
+:root[data-theme='dark'] .admin-ai-loading i::before {
+  background: linear-gradient(90deg, transparent, var(--cyan), transparent);
+}
+
+:root[data-theme='dark'] .admin-ai-oneclick button {
+  color: var(--ink);
+  border-color: rgba(74, 225, 255, .24);
+  background:
+    radial-gradient(circle at 20% 10%, rgba(74, 225, 255, .2), transparent 34%),
+    color-mix(in srgb, var(--panel-solid) 86%, transparent);
+  box-shadow: 0 1rem 2rem rgba(74, 225, 255, .08);
+}
+
+:root[data-theme='dark'] .admin-ai-saved-tip {
+  border-color: rgba(74, 225, 255, .2);
+  background: rgba(74, 225, 255, .07);
+}
+
+@keyframes aiLoadingBar {
+  0% { transform: translateX(-110%); }
+  100% { transform: translateX(250%); }
+}
+
+@keyframes aiSpin {
+  to { transform: rotate(360deg); }
+}
