@@ -1865,3 +1865,172 @@ main :is(h1, h2, h3, p, a, li):hover {
   .admin-ai-fields { grid-template-columns: 1fr; }
   .visitor-ai { right: .75rem; bottom: 4.5rem; }
 }
+
+/* Center-right AI dock */
+.visitor-ai-dock {
+  right: 1.35rem;
+  top: 50%;
+  bottom: auto;
+  z-index: 999;
+  transform: translateY(-50%);
+}
+.visitor-ai-dock .visitor-ai-toggle {
+  width: 4.35rem;
+  height: 4.35rem;
+  overflow: visible;
+  border: 1px solid color-mix(in srgb, var(--accent) 52%, white);
+  background:
+    radial-gradient(circle at 35% 28%, #ffd3a5 0 11%, transparent 12%),
+    radial-gradient(circle at 64% 68%, #d95739 0 13%, transparent 14%),
+    linear-gradient(135deg, #ffad69 0%, #f46f46 58%, #cf5032 100%);
+  box-shadow:
+    0 1.1rem 2.4rem color-mix(in srgb, var(--accent) 32%, transparent),
+    inset -.55rem -.55rem 0 rgba(116, 47, 29, .16),
+    inset .35rem .35rem 0 rgba(255, 255, 255, .18);
+}
+.visitor-ai-dock .visitor-ai-toggle:hover {
+  transform: translateX(-.25rem) scale(1.08) rotate(-4deg);
+}
+.visitor-ai-dock.open .visitor-ai-toggle {
+  transform: translateX(-.35rem) scale(.96) rotate(10deg);
+}
+.visitor-ai-planet {
+  position: absolute;
+  inset: .42rem;
+  border-radius: 50%;
+}
+.visitor-ai-planet b {
+  position: absolute;
+  left: -1rem;
+  right: -1rem;
+  top: 45%;
+  height: .42rem;
+  border: .16rem solid #42745f;
+  border-left-color: transparent;
+  border-right-color: transparent;
+  border-radius: 50%;
+  transform: rotate(-18deg);
+  box-shadow: 0 0 .6rem rgba(66, 116, 95, .25);
+}
+.visitor-ai-planet em {
+  position: absolute;
+  right: -.22rem;
+  top: .45rem;
+  width: .5rem;
+  height: .5rem;
+  border-radius: 50%;
+  background: #f7fff0;
+  box-shadow: 0 0 0 .22rem rgba(247, 255, 240, .2), 0 0 1rem #fff7c7;
+}
+.visitor-ai-dock .visitor-ai-toggle small {
+  position: absolute;
+  right: -.18rem;
+  bottom: -.18rem;
+  display: grid;
+  place-items: center;
+  width: 1.55rem;
+  height: 1.55rem;
+  border: 2px solid var(--surface);
+  border-radius: 50%;
+  color: white;
+  background: #1c332b;
+  font-size: .62rem;
+  font-weight: 900;
+  letter-spacing: .03em;
+}
+.visitor-ai-dock .visitor-ai-panel {
+  position: absolute;
+  right: 5.25rem;
+  top: 50%;
+  width: min(34rem, calc(100vw - 7rem));
+  min-height: 31rem;
+  border-radius: 1.45rem;
+  transform-origin: center right;
+  animation: aiPanelFromPlanet .34s cubic-bezier(.2,.9,.2,1) both;
+}
+.visitor-ai-dock .visitor-ai-head {
+  padding: 1rem 1.1rem;
+}
+.visitor-ai-dock .visitor-ai-head span {
+  color: var(--ink);
+  font-size: 1rem;
+  font-weight: 900;
+}
+.visitor-ai-dock .visitor-ai-body {
+  min-height: 22rem;
+  max-height: 28rem;
+  padding: 1rem;
+}
+.visitor-ai-dock .visitor-ai-body article {
+  padding: .8rem .9rem;
+  border-radius: 1.05rem;
+}
+.visitor-ai-dock .visitor-ai form {
+  padding: .95rem;
+}
+.visitor-ai-dock .visitor-ai input,
+.visitor-ai-dock input {
+  min-height: 3rem;
+  font-size: .98rem;
+}
+.visitor-ai-dock .visitor-ai form button,
+.visitor-ai-dock form button {
+  width: 3rem;
+}
+@keyframes aiPanelFromPlanet {
+  from {
+    opacity: 0;
+    clip-path: circle(0% at 100% 50%);
+    transform: translateX(1rem) translateY(-50%) scale(.88);
+  }
+  to {
+    opacity: 1;
+    clip-path: circle(145% at 100% 50%);
+    transform: translateX(0) translateY(-50%) scale(1);
+  }
+}
+:root[data-theme='dark'] .visitor-ai-dock .visitor-ai-toggle {
+  border-color: color-mix(in srgb, var(--cyan) 55%, #fff);
+  background:
+    radial-gradient(circle at 35% 28%, #99f7ff 0 10%, transparent 11%),
+    radial-gradient(circle at 64% 68%, #4c2bbd 0 14%, transparent 15%),
+    linear-gradient(135deg, #40e6ff 0%, #5a69ff 56%, #7b37d8 100%);
+  box-shadow:
+    0 1.1rem 2.4rem rgba(64, 230, 255, .26),
+    inset -.55rem -.55rem 0 rgba(12, 7, 50, .26),
+    inset .35rem .35rem 0 rgba(255, 255, 255, .16);
+}
+:root[data-theme='dark'] .visitor-ai-dock .visitor-ai-toggle small {
+  background: #07111f;
+  border-color: var(--panel-solid);
+}
+@media (max-width: 760px) {
+  .visitor-ai-dock {
+    right: .8rem;
+  }
+  .visitor-ai-dock .visitor-ai-toggle {
+    width: 3.75rem;
+    height: 3.75rem;
+  }
+  .visitor-ai-dock .visitor-ai-panel {
+    right: 4.35rem;
+    width: min(27rem, calc(100vw - 5.5rem));
+    min-height: 27rem;
+  }
+}
+@media (max-width: 540px) {
+  .visitor-ai-dock {
+    top: auto;
+    right: .8rem;
+    bottom: 5rem;
+    transform: none;
+  }
+  .visitor-ai-dock .visitor-ai-panel {
+    right: 0;
+    top: auto;
+    bottom: 4.8rem;
+    width: calc(100vw - 1.6rem);
+    transform-origin: bottom right;
+    animation: aiPanelIn .24s ease both;
+  }
+}
