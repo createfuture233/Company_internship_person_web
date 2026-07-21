@@ -1,0 +1,32 @@
+{
+    "article": {
+        "title": "Java Project Development Guide",
+        "summary": "A comprehensive guide to Java project development best practices and implementation strategies.",
+        "introduction": "This article covers essential concepts and practices for building robust Java applications, including project structure, dependency management, and coding standards.",
+        "content": {
+            "sections": [
+                {
+                    "heading": "Project Setup",
+                    "description": "Initialize and configure your Java project environment"
+                },
+                {
+                    "heading": "Best Practices",
+                    "description": "Follow industry standards for code quality and maintainability"
+                },
+                {
+                    "heading": "Testing",
+                    "description": "Implement unit tests and integration tests for reliability"
+                },
+                {
+                    "heading": "Deployment",
+                    "description": "Deploy your Java application to production environments"
+                }
+            ]
+        },
+        "metadata": {
+            "language": "zh-CN",
+            "category": "Java",
+            "created_date": "2024-01-01"
+        }
+    }
+}

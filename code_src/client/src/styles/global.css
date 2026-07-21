@@ -2181,6 +2181,87 @@ main :is(h1, h2, h3, p, a, li):hover {
   background: rgba(74, 225, 255, .07);
 }
 
+/* Freeze text hover inside reading/detail and AI content areas.
+   Global text proximity is nice for decorative sections, but article/project
+   bodies and generated AI text should read like stable content. */
+:root[data-theme='light'] main :is(.detail-page, .detail-body, .detail-spec, .article-card, .project-card, .comments-panel, .comment-card, .admin-ai-safe-zone, .admin-ai-card, .admin-ai-message, .admin-ai-preview, .admin-ai-draft, .admin-ai-analysis, .visitor-ai-panel) :is(h1, h2, h3, h4, p, a, li, span, strong, em, label, pre):hover,
+:root[data-theme='dark'] main :is(.detail-page, .detail-body, .detail-spec, .article-card, .project-card, .comments-panel, .comment-card, .admin-ai-safe-zone, .admin-ai-card, .admin-ai-message, .admin-ai-preview, .admin-ai-draft, .admin-ai-analysis, .visitor-ai-panel) :is(h1, h2, h3, h4, p, a, li, span, strong, em, label, pre):hover,
+main :is(.detail-page, .detail-body, .detail-spec, .article-card, .project-card, .comments-panel, .comment-card, .admin-ai-safe-zone, .admin-ai-card, .admin-ai-message, .admin-ai-preview, .admin-ai-draft, .admin-ai-analysis, .visitor-ai-panel) :is(h1, h2, h3, h4, p, a, li, span, strong, em, label, pre):hover {
+  color: inherit !important;
+  letter-spacing: inherit !important;
+  text-shadow: none !important;
+  transform: none !important;
+}
+
+:root[data-theme='light'] main :is(.detail-page, .detail-body, .admin-ai-safe-zone, .visitor-ai-panel) :is(input, textarea, select):hover,
+:root[data-theme='dark'] main :is(.detail-page, .detail-body, .admin-ai-safe-zone, .visitor-ai-panel) :is(input, textarea, select):hover,
+main :is(.detail-page, .detail-body, .admin-ai-safe-zone, .visitor-ai-panel) :is(input, textarea, select):hover {
+  letter-spacing: inherit !important;
+  text-shadow: none !important;
+  transform: none !important;
+}
+
+.detail-body :is(p, h2, blockquote, li, span, strong, em, pre),
+.detail-spec :is(span, strong),
+.article-card :is(h3, p, span, strong, em),
+.project-card :is(h3, p, span, strong, em),
+.admin-ai-safe-zone :is(h1, h2, h3, h4, p, li, span, strong, em, label, pre),
+.visitor-ai-panel :is(p, span, strong, em) {
+  transition-property: opacity, border-color, box-shadow, background !important;
+}
+
+main .detail-lead:hover,
+main .detail-body p:hover,
+main .article-card > p:not(.meta):hover,
+main .project-card > p:hover,
+main .comment-card p:hover {
+  color: var(--muted) !important;
+}
+
+main .detail-body h2:hover,
+main .article-card h3:hover,
+main .project-card h3:hover,
+main .admin-ai-preview strong:hover,
+main .admin-ai-draft h3:hover,
+main .admin-ai-message p:hover,
+main .admin-ai-analysis p:hover,
+main .admin-ai-draft pre:hover {
+  color: var(--ink) !important;
+}
+
+main .detail-spec span:hover,
+main .article-card .meta:hover,
+main .admin-ai-message span:hover,
+main .admin-ai-preview span:hover,
+main .admin-ai-empty span:hover {
+  color: var(--muted) !important;
+}
+
+main .detail-spec strong:hover {
+  color: var(--cyan) !important;
+}
+
+:root[data-theme='light'] main .detail-spec strong:hover,
+:root[data-theme='light'] main .project-card > span:hover {
+  color: var(--accent) !important;
+}
+
+main .detail-body blockquote:hover {
+  color: var(--cyan) !important;
+}
+
+:root[data-theme='light'] main .detail-body blockquote:hover {
+  color: var(--leaf) !important;
+}
+
+main .admin-ai-draft em:hover {
+  color: var(--accent) !important;
+}
+
+main .admin-ai-draft span:hover {
+  color: var(--muted) !important;
+}
+
 @keyframes aiLoadingBar {
   0% { transform: translateX(-110%); }
   100% { transform: translateX(250%); }
