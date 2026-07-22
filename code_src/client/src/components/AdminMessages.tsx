@@ -25,7 +25,7 @@ const format = (value: string) =>
     timeStyle: "short",
   }).format(new Date(value));
 
-export default function AdminMessagesV2() {
+export default function AdminMessages() {
   const [items, setItems] = useState<Item[]>([]);
   const [filter, setFilter] = useState("");
   const [notice, setNotice] = useState("");

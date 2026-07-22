@@ -104,7 +104,7 @@ function TrendChart({ points }: { points: TrendPoint[] }) {
   </div>;
 }
 
-export default function AdminDashboardV3() {
+export default function AdminDashboard() {
   const [data, setData] = useState<Overview | null>(null);
   const [error, setError] = useState("");
 
