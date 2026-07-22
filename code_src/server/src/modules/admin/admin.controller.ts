@@ -67,12 +67,18 @@ function safeCoverExtension(file: { originalname?: string; mimetype?: string }) 
   return '.png'
 }
 
-function clientPublicRoot() {
-  const fromCodeRoot = join(process.cwd(), 'client', 'public')
-  if (existsSync(fromCodeRoot)) return fromCodeRoot
-  const fromServerRoot = join(process.cwd(), '..', 'client', 'public')
-  if (existsSync(fromServerRoot)) return fromServerRoot
-  return fromCodeRoot
+function uploadRoot() {
+  const envUploadRoot = process.env.UPLOAD_ROOT?.trim()
+  if (envUploadRoot) return envUploadRoot
+
+  const cwd = process.cwd()
+  if (existsSync(join(cwd, 'prisma')) || existsSync(join(cwd, 'src'))) {
+    return join(cwd, '..', '..', 'uploads')
+  }
+  if (existsSync(join(cwd, 'client')) && existsSync(join(cwd, 'server'))) {
+    return join(cwd, '..', 'uploads')
+  }
+  return join(cwd, 'uploads')
 }
 
 @Controller('api')
@@ -98,12 +104,12 @@ export class AdminController {
     if (!['article', 'project'].includes(type)) throw new BadRequestException('type must be article or project')
 
     const folder = type === ContentType.project ? 'projects' : 'articles'
-    const uploadDir = join(clientPublicRoot(), 'assets', 'images', 'uploads', folder)
+    const uploadDir = join(uploadRoot(), 'images', folder)
     mkdirSync(uploadDir, { recursive: true })
     const filename = `${type}-cover-${Date.now()}-${randomBytes(4).toString('hex')}${safeCoverExtension(file)}`
     const target = join(uploadDir, filename)
     writeFileSync(target, file.buffer)
-    const url = `/assets/images/uploads/${folder}/${filename}`
+    const url = `/uploads/images/${folder}/${filename}`
     await this.adminService.audit(admin.id, 'upload_cover', 'asset', filename, { type, url })
     return { url }
   }

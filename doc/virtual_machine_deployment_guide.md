@@ -363,6 +363,12 @@ server {
 
     client_max_body_size 20m;
 
+    location /uploads/ {
+        alias /var/www/Company_internship_person_web/uploads/;
+        access_log off;
+        expires 30d;
+    }
+
     location /api/ {
         proxy_pass http://127.0.0.1:3000/api/;
         proxy_http_version 1.1;
@@ -822,19 +828,36 @@ grep DATABASE_URL .env
 
 ## 12. 上传图片目录
 
-后台上传封面图会保存到前端静态资源目录：
+后台上传封面图会保存到项目根目录的独立上传目录：
 
 ```bash
-/var/www/Company_internship_person_web/code_src/client/public/assets/images/uploads
+/var/www/Company_internship_person_web/uploads/images
 ```
 
 查看上传图片：
 
 ```bash
-find /var/www/Company_internship_person_web/code_src/client/public/assets/images/uploads -type f | head
+find /var/www/Company_internship_person_web/uploads/images -type f | head
 ```
 
-注意：如果后续重新上传整个项目，不要误删该目录，否则后台上传的图片会丢失。
+后端上传成功后会返回类似下面的图片地址：
+
+```txt
+/uploads/images/articles/article-cover-xxxx.png
+/uploads/images/projects/project-cover-xxxx.png
+```
+
+Nginx 需要配置 `/uploads/` 静态映射：
+
+```nginx
+location /uploads/ {
+    alias /var/www/Company_internship_person_web/uploads/;
+    access_log off;
+    expires 30d;
+}
+```
+
+注意：如果后续重新上传整个项目，不要误删 `/var/www/Company_internship_person_web/uploads` 目录，否则后台上传的图片会丢失。
 
 ## 13. 常见问题排查
 
