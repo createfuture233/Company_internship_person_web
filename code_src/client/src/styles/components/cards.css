@@ -51,6 +51,29 @@
 .project-card:hover::before { opacity: 1; }
 .timeline article, .process-grid article { min-height: 220px; padding: 28px; border-left: 1px solid var(--line); }
 .topic-grid span { border-radius: 999px; box-shadow: 0 6px 14px #0206171f; }
+.content-cover-thumb {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  display: block;
+  object-fit: cover;
+  border: 1px solid color-mix(in srgb, var(--line) 76%, transparent);
+  border-radius: 16px;
+  margin-bottom: 1rem;
+  background: var(--panel);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, .28) inset,
+    0 16px 28px color-mix(in srgb, var(--ink) 10%, transparent);
+  transition: transform .3s ease, box-shadow .3s ease, filter .3s ease;
+}
+.article-card:hover .content-cover-thumb,
+.project-card:hover .content-cover-thumb {
+  transform: scale(1.018);
+  filter: saturate(1.05) contrast(1.02);
+  box-shadow: 0 20px 38px color-mix(in srgb, var(--accent) 18%, transparent);
+}
+.project-card .content-cover-thumb {
+  margin-bottom: auto;
+}
 :root[data-theme='light'] :where(.stat-grid > div, .explore-grid > a, .article-card, .project-card, .timeline article, .process-grid article, .about-panel, .topic-grid span) {
   border-color: #d9cfbe;
   background: linear-gradient(145deg, #fffefa, #f6f0e5);
@@ -63,6 +86,10 @@
 :root[data-theme='light'] :where(.stat-grid > div, .explore-grid > a, .article-card, .project-card, .timeline article, .process-grid article, .about-panel)::before,
 :root[data-theme='light'] .project-card::before { background: radial-gradient(340px circle at var(--card-glow-x) var(--card-glow-y), #ee704c2e, transparent 48%); }
 :root[data-theme='light'] .explore-grid a b { color: #fffdf8; background: var(--accent); }
+:root[data-theme='light'] .content-cover-thumb {
+  border-color: #e5d8c8;
+  box-shadow: 0 1px 0 #fff inset, 0 16px 28px #5f51351c;
+}
 @media (max-width: 720px) {
   .stat-grid > div, .explore-grid a, .project-card { min-height: 220px; }
   .article-card { padding: 15px; }

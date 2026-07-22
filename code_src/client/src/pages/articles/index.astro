@@ -2,11 +2,13 @@
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import ProximityHeading from "../../components/ProximityHeading";
 import { apiBase } from "../../lib/api";
+import { resolveCover } from "../../lib/defaultCovers";
 
 type Article = {
   id: string;
   title: string;
   summary: string;
+  coverUrl: string | null;
   publishedAt: string | null;
   tags: Array<{ name: string }>;
 };
@@ -57,20 +59,20 @@ const pageNumbers = Array.from({ length: totalPages }, (_, index) => index + 1);
       ) : articles.length ? (
         <>
           <div class="article-grid">
-            {pagedArticles.map((article, index) => (
+            {pagedArticles.map((article) => (
               <article class="article-card">
-                <div
-                  class={`article-illustration illustration-${(index % 3) + 1}`}
-                >
-                  <span>{article.tags[0]?.name ?? "文章"}</span>
-                </div>
-                <p class="meta">{formatDate(article.publishedAt)} · 阅读文章</p>
+                <img
+                  class="content-cover-thumb"
+                  src={resolveCover("article", article.id, article.coverUrl)}
+                  alt={`${article.title} 封面图`}
+                  loading="lazy"
+                />
+                <p class="meta">
+                  {formatDate(article.publishedAt)} · {article.tags[0]?.name ?? "文章"}
+                </p>
                 <h3>{article.title}</h3>
                 <p>{article.summary}</p>
-                <a
-                  class="text-button reveal-link"
-                  href={`/articles/${article.id}`}
-                >
+                <a class="text-button reveal-link" href={`/articles/${article.id}`}>
                   阅读文章 ↗
                 </a>
               </article>
@@ -122,9 +124,12 @@ const pageNumbers = Array.from({ length: totalPages }, (_, index) => index + 1);
     <div class="detail-block">
       <p class="eyebrow">TOPICS I FOLLOW</p>
       <div class="topic-grid">
-        <span>前端工程化</span><span>交互与动效</span><span>产品思考</span><span
-          >个人成长</span
-        ><span>设计灵感</span><span>AI 协作</span>
+        <span>前端工程化</span>
+        <span>交互与动效</span>
+        <span>产品思考</span>
+        <span>个人成长</span>
+        <span>设计灵感</span>
+        <span>AI 协作</span>
       </div>
     </div>
   </section>

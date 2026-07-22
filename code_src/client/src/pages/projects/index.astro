@@ -2,12 +2,14 @@
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import ProximityHeading from "../../components/ProximityHeading";
 import { apiBase } from "../../lib/api";
+import { resolveCover } from "../../lib/defaultCovers";
 
 type Project = {
   id: string;
   slug: string;
   title: string;
   summary: string;
+  coverUrl: string | null;
   stack: string | null;
   tags: Array<{ name: string }>;
 };
@@ -57,6 +59,12 @@ const pageNumbers = Array.from({ length: totalPages }, (_, index) => index + 1);
                 class={`project-card project-${(index % 2) + 1} reveal-link`}
                 href={`/projects/${project.slug}`}
               >
+                <img
+                  class="content-cover-thumb"
+                  src={resolveCover("project", project.slug || project.id, project.coverUrl)}
+                  alt={`${project.title} 封面图`}
+                  loading="lazy"
+                />
                 <p>{project.tags[0]?.name ?? "项目作品"}</p>
                 <h3>{project.title}</h3>
                 <p>{project.summary}</p>
@@ -111,17 +119,19 @@ const pageNumbers = Array.from({ length: totalPages }, (_, index) => index + 1);
       <p class="eyebrow">HOW I BUILD</p>
       <div class="process-grid">
         <article>
-          <span>01</span><h3>发现问题</h3><p>
-            从真实使用场景开始，而不是从功能列表开始。
-          </p>
-        </article><article>
-          <span>02</span><h3>设计路径</h3><p>
-            将内容、交互和视觉组织为连贯体验。
-          </p>
-        </article><article>
-          <span>03</span><h3>快速迭代</h3><p>
-            通过可运行的原型不断验证与完善。
-          </p>
+          <span>01</span>
+          <h3>发现问题</h3>
+          <p>从真实使用场景开始，而不是从功能列表开始。</p>
+        </article>
+        <article>
+          <span>02</span>
+          <h3>设计路径</h3>
+          <p>将内容、交互和视觉组织为连贯体验。</p>
+        </article>
+        <article>
+          <span>03</span>
+          <h3>快速迭代</h3>
+          <p>通过可运行的原型不断验证与完善。</p>
         </article>
       </div>
     </div>

@@ -6,20 +6,26 @@ import Comments from "../../components/Comments";
 import AdminDetailEdit from "../../components/AdminDetailEdit";
 import MarkdownRenderer from "../../components/MarkdownRenderer";
 import { apiBase } from "../../lib/api";
+import { resolveCover } from "../../lib/defaultCovers";
 
 const { id } = Astro.params;
 const response = id
   ? await fetch(`${apiBase}/content/article/${encodeURIComponent(id)}`)
   : null;
+
 if (!response?.ok) return Astro.redirect("/articles");
+
 const article = (await response.json()) as {
   id: string;
   title: string;
   summary: string;
   body: string;
+  coverUrl: string | null;
   publishedAt: string | null;
   tags: Array<{ name: string }>;
 };
+
+const cover = resolveCover("article", article.id, article.coverUrl);
 const date = article.publishedAt
   ? new Intl.DateTimeFormat("zh-CN", { dateStyle: "medium" }).format(
       new Date(article.publishedAt),
@@ -28,12 +34,15 @@ const date = article.publishedAt
 ---
 
 <BaseLayout title={`${article.title}｜个人星球`}>
-  <article class="detail-page " data-content-type="article" data-content-id={article.id}>
+  <article class="detail-page" data-content-type="article" data-content-id={article.id}>
     <a class="back-link" href="/articles">← 返回文章列表</a>
+    <img class="detail-cover" src={cover} alt={`${article.title} 封面图`} />
     <p class="eyebrow">{article.tags[0]?.name ?? "文章"} · {date}</p>
     <h1 data-content-title>{article.title}</h1>
     <p class="detail-lead" data-content-summary>{article.summary}</p>
-    <div class="detail-body"><MarkdownRenderer client:load content={article.body} /></div>
+    <div class="detail-body">
+      <MarkdownRenderer client:load content={article.body} />
+    </div>
     <AdminDetailEdit client:load type="article" id={article.id} />
     <Comments client:load contentType="article" contentId={article.id} />
   </article>

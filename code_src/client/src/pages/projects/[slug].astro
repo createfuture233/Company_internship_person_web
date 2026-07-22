@@ -6,25 +6,33 @@ import Comments from "../../components/Comments";
 import AdminDetailEdit from "../../components/AdminDetailEdit";
 import MarkdownRenderer from "../../components/MarkdownRenderer";
 import { apiBase } from "../../lib/api";
+import { resolveCover } from "../../lib/defaultCovers";
 
 const { slug } = Astro.params;
 const response = slug
   ? await fetch(`${apiBase}/content/project/${encodeURIComponent(slug)}`)
   : null;
+
 if (!response?.ok) return Astro.redirect("/projects");
+
 const project = (await response.json()) as {
   id: string;
+  slug: string;
   title: string;
   summary: string;
   body: string;
+  coverUrl: string | null;
   stack: string | null;
   tags: Array<{ name: string }>;
 };
+
+const cover = resolveCover("project", project.slug || project.id, project.coverUrl);
 ---
 
 <BaseLayout title={`${project.title}｜个人星球`}>
-  <article class="detail-page " data-content-type="project" data-content-id={project.id}>
+  <article class="detail-page" data-content-type="project" data-content-id={project.id}>
     <a class="back-link" href="/projects">← 返回作品列表</a>
+    <img class="detail-cover" src={cover} alt={`${project.title} 封面图`} />
     <p class="eyebrow">{project.tags[0]?.name ?? "项目作品"}</p>
     <h1 data-content-title>{project.title}</h1>
     <p class="detail-lead" data-content-summary>{project.summary}</p>
@@ -32,9 +40,10 @@ const project = (await response.json()) as {
       <h2>项目内容</h2>
       <MarkdownRenderer client:load content={project.body} />
       <div class="detail-spec">
-        <span>技术栈</span><strong>{project.stack ?? "持续迭代中"}</strong><span
-          >状态</span
-        ><strong>持续迭代中</strong>
+        <span>技术栈</span>
+        <strong>{project.stack ?? "持续迭代中"}</strong>
+        <span>状态</span>
+        <strong>持续迭代中</strong>
       </div>
     </div>
     <AdminDetailEdit client:load type="project" id={project.id} />
