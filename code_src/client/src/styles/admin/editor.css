@@ -232,6 +232,158 @@
   padding: 1rem;
 }
 
+.admin-cover-picker {
+  grid-column: 1 / -1;
+  display: grid;
+  gap: 1rem;
+  min-width: 0;
+  padding: 1rem;
+  border: 1px solid var(--line);
+  border-radius: 1rem;
+  background: color-mix(in srgb, var(--panel-solid) 52%, transparent);
+  box-shadow: 0 .8rem 1.8rem color-mix(in srgb, black 7%, transparent);
+}
+
+.admin-cover-picker-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.admin-cover-picker-head span {
+  display: block;
+  color: var(--ink);
+  font-weight: 900;
+}
+
+.admin-cover-picker-head small {
+  color: var(--muted);
+  line-height: 1.6;
+}
+
+.admin-cover-picker-head button {
+  border: 1px solid color-mix(in srgb, var(--accent) 28%, var(--line));
+  border-radius: 999px;
+  padding: .55rem .85rem;
+  color: var(--accent);
+  background:
+    radial-gradient(circle at 18% 10%, rgba(255, 255, 255, .78), transparent 35%),
+    color-mix(in srgb, var(--accent) 9%, var(--surface));
+  cursor: pointer;
+  font: inherit;
+  font-weight: 800;
+  transition: transform .22s ease, background .22s ease, color .22s ease, border-color .22s ease, box-shadow .22s ease;
+}
+
+.admin-cover-picker-head button:hover {
+  transform: translateY(-2px);
+  color: #fff;
+  background: var(--accent);
+  border-color: var(--accent);
+  box-shadow: 0 1rem 2.2rem color-mix(in srgb, var(--accent) 24%, transparent);
+}
+
+
+.admin-cover-current {
+  width: min(100%, 34rem);
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+  border: 1px solid var(--line);
+  border-radius: .95rem;
+  background: var(--panel);
+  box-shadow: 0 1rem 2rem color-mix(in srgb, black 10%, transparent);
+}
+
+.admin-cover-options {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: .75rem;
+}
+
+.admin-cover-options button {
+  position: relative;
+  overflow: hidden;
+  min-height: 5.7rem;
+  padding: 0;
+  border: 2px solid transparent;
+  border-radius: .95rem;
+  background: var(--panel);
+  cursor: pointer;
+  box-shadow: 0 .75rem 1.4rem color-mix(in srgb, black 8%, transparent);
+  transition: transform .22s ease, border-color .22s ease, box-shadow .22s ease;
+}
+
+.admin-cover-options button:hover,
+.admin-cover-options button.active {
+  transform: translateY(-3px);
+  border-color: var(--accent);
+  box-shadow: 0 1rem 1.8rem color-mix(in srgb, var(--accent) 18%, transparent);
+}
+
+.admin-cover-options img {
+  width: 100%;
+  height: 100%;
+  aspect-ratio: 16 / 9;
+  display: block;
+  object-fit: cover;
+}
+
+.admin-cover-options span {
+  position: absolute;
+  right: .45rem;
+  bottom: .4rem;
+  padding: .18rem .38rem;
+  border-radius: 999px;
+  color: #fff;
+  background: color-mix(in srgb, var(--ink) 72%, transparent);
+  font: 10px 'DM Mono', monospace;
+}
+
+.admin-cover-url {
+  display: grid;
+  gap: .48rem;
+  color: var(--muted);
+  font-size: .88rem;
+}
+
+.admin-cover-upload {
+  display: inline-flex;
+  width: fit-content;
+  align-items: center;
+  gap: .5rem;
+  border: 1px solid color-mix(in srgb, var(--accent) 42%, var(--line));
+  border-radius: 999px;
+  padding: .72rem 1rem;
+  color: var(--accent);
+  background:
+    radial-gradient(circle at 18% 10%, rgba(255, 255, 255, .78), transparent 35%),
+    color-mix(in srgb, var(--accent) 9%, var(--surface));
+  box-shadow:
+    0 .9rem 1.8rem color-mix(in srgb, var(--accent) 12%, transparent),
+    inset 0 1px 0 rgba(255, 255, 255, .55);
+  cursor: pointer;
+  font-weight: 900;
+  transition: transform .22s ease, background .22s ease, color .22s ease, border-color .22s ease, box-shadow .22s ease;
+}
+
+.admin-cover-upload:hover {
+  transform: translateY(-2px);
+  color: #fff;
+  background: var(--accent);
+  border-color: var(--accent);
+  box-shadow: 0 1rem 2.2rem color-mix(in srgb, var(--accent) 24%, transparent);
+}
+
+.admin-cover-upload input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  opacity: 0;
+  pointer-events: none;
+}
+
 .admin-workbench .admin-editor > label:has(textarea) {
   grid-column: 1;
   order: 20;
@@ -298,11 +450,46 @@
 }
 
 :root[data-theme='light'] .admin-workbench .admin-editor > label,
+:root[data-theme='light'] .admin-cover-picker,
 :root[data-theme='light'] .admin-workbench .admin-save-row,
 :root[data-theme='light'] .admin-workbench .admin-preview {
   border-color: #e1d7c7;
   background: #fff9ef;
   box-shadow: 0 .8rem 1.8rem #47331a10;
+}
+
+:root[data-theme='light'] .admin-cover-current,
+:root[data-theme='light'] .admin-cover-options button {
+  border-color: #e1d7c7;
+  box-shadow: 0 .8rem 1.8rem #47331a12;
+}
+
+:root[data-theme='light'] .admin-cover-upload {
+  color: #d95f3f;
+  border-color: #efb39b;
+  background:
+    radial-gradient(circle at 18% 10%, #ffffff, transparent 38%),
+    linear-gradient(135deg, #fff5ec, #ffe7d9);
+  box-shadow: 0 .9rem 1.8rem #ee704c20, inset 0 1px 0 #fff;
+}
+
+:root[data-theme='light'] .admin-cover-upload:hover {
+  color: #fffdf8;
+  background: linear-gradient(135deg, #ee704c, #ff946f);
+  border-color: #ee704c;
+}
+
+:root[data-theme='dark'] .admin-cover-picker-head button,
+:root[data-theme='dark'] .admin-cover-upload {
+  color: #dff8ff;
+  border-color: rgba(84, 232, 255, .28);
+  background: rgba(84, 232, 255, .08);
+}
+
+:root[data-theme='dark'] .admin-cover-picker-head button:hover,
+:root[data-theme='dark'] .admin-cover-upload:hover {
+  color: #07111e;
+  background: var(--cyan);
 }
 
 @media (max-width: 980px) {
@@ -314,5 +501,9 @@
   .admin-workbench .admin-preview,
   .admin-workbench .admin-save-row {
     grid-column: 1;
+  }
+
+  .admin-cover-options {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }

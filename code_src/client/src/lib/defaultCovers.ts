@@ -10,23 +10,20 @@ const projectCovers = Array.from(
   (_, index) => `/assets/images/projects/project-cover-${String(index + 1).padStart(2, '0')}.png`,
 )
 
-function stableHash(value: string) {
-  let hash = 0
-  for (let index = 0; index < value.length; index += 1) {
-    hash = (hash * 31 + value.charCodeAt(index)) >>> 0
-  }
-  return hash
+export function getCoverOptions(type: CoverType) {
+  return type === 'article' ? articleCovers : projectCovers
 }
 
-export function getDefaultCover(type: CoverType, seed: string) {
-  const covers = type === 'article' ? articleCovers : projectCovers
-  return covers[stableHash(seed || type) % covers.length]
+export function getSequentialCover(type: CoverType, index = 0) {
+  const covers = getCoverOptions(type)
+  const safeIndex = Number.isFinite(index) ? Math.max(0, Math.trunc(index)) : 0
+  return covers[safeIndex % covers.length]
 }
 
 export function resolveCover(
   type: CoverType,
-  seed: string,
   coverUrl?: string | null,
+  index = 0,
 ) {
-  return coverUrl?.trim() || getDefaultCover(type, seed)
+  return coverUrl?.trim() || getSequentialCover(type, index)
 }

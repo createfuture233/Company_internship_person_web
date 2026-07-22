@@ -25,7 +25,7 @@ const article = (await response.json()) as {
   tags: Array<{ name: string }>;
 };
 
-const cover = resolveCover("article", article.id, article.coverUrl);
+const cover = resolveCover("article", article.coverUrl);
 const date = article.publishedAt
   ? new Intl.DateTimeFormat("zh-CN", { dateStyle: "medium" }).format(
       new Date(article.publishedAt),

@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import type { ChangeEvent } from "react";
 import {
   ArrowLeft,
   Edit3,
@@ -12,6 +13,7 @@ import {
   Trash2,
 } from "lucide-react";
 import { apiBase } from "../lib/api";
+import { getCoverOptions, resolveCover } from "../lib/defaultCovers";
 import MarkdownRenderer from "./MarkdownRenderer";
 import Pagination from "./Pagination";
 
@@ -102,6 +104,7 @@ export default function AdminPanel({
   const [page, setPage] = useState(1);
   const pageSize = 5;
   const typeName = contentType === "article" ? "文章" : "作品";
+  const coverOptions = useMemo(() => getCoverOptions(contentType), [contentType]);
 
   const headers = () => ({
     Authorization: `Bearer ${localStorage.getItem("personal-planet-admin-token")}`,
@@ -222,6 +225,36 @@ export default function AdminPanel({
       setMessage("保存失败，请确认后端服务正在运行且管理员状态有效。");
     } finally {
       setSaving(false);
+    }
+  }
+
+  async function uploadCover(event: ChangeEvent<HTMLInputElement>) {
+    const file = event.currentTarget.files?.[0];
+    if (!file || !form) return;
+    if (!file.type.startsWith("image/")) {
+      setMessage("请选择图片文件作为封面。");
+      return;
+    }
+    const data = new FormData();
+    data.append("file", file);
+    setMessage("封面图片上传中...");
+    try {
+      const response = await fetch(
+        `${apiBase}/admin/uploads/cover?type=${contentType}`,
+        {
+          method: "POST",
+          headers: headers(),
+          body: data,
+        },
+      );
+      if (!response.ok) throw new Error("upload failed");
+      const result = (await response.json()) as { url: string };
+      setForm({ ...form, coverUrl: result.url });
+      setMessage("封面图片已上传，保存内容后生效。");
+    } catch {
+      setMessage("封面上传失败，请确认后端服务和管理员登录状态。");
+    } finally {
+      event.currentTarget.value = "";
     }
   }
 
@@ -431,17 +464,58 @@ export default function AdminPanel({
               }
             />
           </label>
-          <label>
-            封面图地址（可空）
-            <input
-              type="url"
-              value={form.coverUrl ?? ""}
-              placeholder="https://example.com/cover.jpg"
-              onChange={(event) =>
-                setForm({ ...form, coverUrl: event.target.value })
-              }
+          <section className="admin-cover-picker">
+            <div className="admin-cover-picker-head">
+              <div>
+                <span>封面图</span>
+                <small>可从默认图库选择，也可以上传自己的图片。</small>
+              </div>
+              <button
+                type="button"
+                onClick={() => setForm({ ...form, coverUrl: "" })}
+              >
+                使用随机默认
+              </button>
+            </div>
+            <img
+              className="admin-cover-current"
+              src={resolveCover(contentType, form.coverUrl)}
+              alt="当前封面预览"
             />
-          </label>
+            <div className="admin-cover-options">
+              {coverOptions.map((cover, index) => (
+                <button
+                  key={cover}
+                  className={form.coverUrl === cover ? "active" : ""}
+                  type="button"
+                  onClick={() => setForm({ ...form, coverUrl: cover })}
+                >
+                  <img src={cover} alt={`默认封面 ${index + 1}`} />
+                  <span>{String(index + 1).padStart(2, "0")}</span>
+                </button>
+              ))}
+            </div>
+            <label className="admin-cover-url">
+              封面图地址
+              <input
+                type="text"
+                value={form.coverUrl ?? ""}
+                placeholder="/assets/images/articles/article-cover-01.png"
+                onChange={(event) =>
+                  setForm({ ...form, coverUrl: event.target.value })
+                }
+              />
+            </label>
+            <label className="admin-cover-upload">
+              <Image size={16} />
+              上传自己的封面图
+              <input
+                type="file"
+                accept="image/png,image/jpeg,image/webp,image/svg+xml"
+                onChange={uploadCover}
+              />
+            </label>
+          </section>
           {contentType === "project" && (
             <label>
               技术栈（可空）
@@ -507,22 +581,11 @@ export default function AdminPanel({
             <Eye size={16} /> 详情页实时预览
           </div>
           <article className="admin-preview-detail">
-            {form.coverUrl && (
-              <img
-                className="admin-cover-preview"
-                src={form.coverUrl}
-                alt="封面预览"
-                onError={(event) => {
-                  event.currentTarget.style.display = "none";
-                }}
-              />
-            )}
-            {!form.coverUrl && (
-              <div className="admin-cover-placeholder">
-                <Image size={25} />
-                未设置封面图
-              </div>
-            )}
+            <img
+              className="admin-cover-preview"
+              src={resolveCover(contentType, form.coverUrl)}
+              alt="封面预览"
+            />
             <p className="eyebrow">
               {contentType === "article" ? "ARTICLE DETAIL" : "PROJECT DETAIL"}{" "}
               · {form.status}

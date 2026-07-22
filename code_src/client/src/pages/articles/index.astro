@@ -59,60 +59,39 @@ const pageNumbers = Array.from({ length: totalPages }, (_, index) => index + 1);
       ) : articles.length ? (
         <>
           <div class="article-grid">
-            {pagedArticles.map((article) => (
-              <article class="article-card">
-                <img
-                  class="content-cover-thumb"
-                  src={resolveCover("article", article.id, article.coverUrl)}
-                  alt={`${article.title} 封面图`}
-                  loading="lazy"
-                />
-                <p class="meta">
-                  {formatDate(article.publishedAt)} · {article.tags[0]?.name ?? "文章"}
-                </p>
-                <h3>{article.title}</h3>
-                <p>{article.summary}</p>
-                <a class="text-button reveal-link" href={`/articles/${article.id}`}>
-                  阅读文章 ↗
-                </a>
-              </article>
-            ))}
+            {pagedArticles.map((article, index) => {
+              const coverIndex = (currentPage - 1) * pageSize + index;
+              return (
+                <article class="article-card">
+                  <img
+                    class="content-cover-thumb"
+                    src={resolveCover("article", article.coverUrl, coverIndex)}
+                    alt={`${article.title} 封面图`}
+                    loading="lazy"
+                  />
+                  <p class="meta">
+                    {formatDate(article.publishedAt)} · {article.tags[0]?.name ?? "文章"}
+                  </p>
+                  <h3>{article.title}</h3>
+                  <p>{article.summary}</p>
+                  <a class="text-button reveal-link" href={`/articles/${article.id}`}>
+                    阅读文章 ↗
+                  </a>
+                </article>
+              );
+            })}
           </div>
           {totalPages > 1 && (
             <nav class="pagination" aria-label="文章分页">
-              <a
-                class={currentPage === 1 ? "disabled" : ""}
-                href={currentPage === 1 ? undefined : "/articles?page=1"}
-              >
-                第一页
-              </a>
-              <a
-                class={currentPage === 1 ? "disabled" : ""}
-                href={currentPage === 1 ? undefined : `/articles?page=${currentPage - 1}`}
-              >
-                上一页
-              </a>
+              <a class={currentPage === 1 ? "disabled" : ""} href={currentPage === 1 ? undefined : "/articles?page=1"}>第一页</a>
+              <a class={currentPage === 1 ? "disabled" : ""} href={currentPage === 1 ? undefined : `/articles?page=${currentPage - 1}`}>上一页</a>
               {pageNumbers.map((page) => (
-                <a
-                  class={page === currentPage ? "active" : ""}
-                  href={`/articles?page=${page}`}
-                  aria-current={page === currentPage ? "page" : undefined}
-                >
+                <a class={page === currentPage ? "active" : ""} href={`/articles?page=${page}`} aria-current={page === currentPage ? "page" : undefined}>
                   {page}
                 </a>
               ))}
-              <a
-                class={currentPage === totalPages ? "disabled" : ""}
-                href={currentPage === totalPages ? undefined : `/articles?page=${currentPage + 1}`}
-              >
-                下一页
-              </a>
-              <a
-                class={currentPage === totalPages ? "disabled" : ""}
-                href={currentPage === totalPages ? undefined : `/articles?page=${totalPages}`}
-              >
-                最后一页
-              </a>
+              <a class={currentPage === totalPages ? "disabled" : ""} href={currentPage === totalPages ? undefined : `/articles?page=${currentPage + 1}`}>下一页</a>
+              <a class={currentPage === totalPages ? "disabled" : ""} href={currentPage === totalPages ? undefined : `/articles?page=${totalPages}`}>最后一页</a>
             </nav>
           )}
         </>

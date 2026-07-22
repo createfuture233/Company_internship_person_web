@@ -26,7 +26,7 @@ const project = (await response.json()) as {
   tags: Array<{ name: string }>;
 };
 
-const cover = resolveCover("project", project.slug || project.id, project.coverUrl);
+const cover = resolveCover("project", project.coverUrl);
 ---
 
 <BaseLayout title={`${project.title}｜个人星球`}>

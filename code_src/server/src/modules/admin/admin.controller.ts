@@ -1,7 +1,10 @@
-import { BadRequestException, Body, Controller, Delete, Get, Headers, NotFoundException, Param, Patch, Post, Query } from '@nestjs/common'
+import { BadRequestException, Body, Controller, Delete, Get, Headers, NotFoundException, Param, Patch, Post, Query, UploadedFile, UseInterceptors } from '@nestjs/common'
+import { FileInterceptor } from '@nestjs/platform-express'
 import { Type } from 'class-transformer'
 import { IsArray, IsIn, IsNotEmpty, IsOptional, MaxLength, ValidateNested } from 'class-validator'
 import { randomBytes } from 'node:crypto'
+import { existsSync, mkdirSync, writeFileSync } from 'node:fs'
+import { extname, join } from 'node:path'
 import { CommentStatus, ContentStatus, ContentType, Prisma } from '@prisma/client'
 import { PrismaService } from '../../prisma/prisma.module'
 import { AdminService } from './admin.service'
@@ -52,6 +55,26 @@ function nowIso() {
   return new Date().toISOString()
 }
 
+const allowedCoverMimeTypes = new Set(['image/png', 'image/jpeg', 'image/webp', 'image/svg+xml'])
+
+function safeCoverExtension(file: { originalname?: string; mimetype?: string }) {
+  const raw = extname(file.originalname ?? '').toLowerCase()
+  if (['.png', '.jpg', '.jpeg', '.webp', '.svg'].includes(raw)) return raw
+  if (file.mimetype === 'image/png') return '.png'
+  if (file.mimetype === 'image/jpeg') return '.jpg'
+  if (file.mimetype === 'image/webp') return '.webp'
+  if (file.mimetype === 'image/svg+xml') return '.svg'
+  return '.png'
+}
+
+function clientPublicRoot() {
+  const fromCodeRoot = join(process.cwd(), 'client', 'public')
+  if (existsSync(fromCodeRoot)) return fromCodeRoot
+  const fromServerRoot = join(process.cwd(), '..', 'client', 'public')
+  if (existsSync(fromServerRoot)) return fromServerRoot
+  return fromCodeRoot
+}
+
 @Controller('api')
 export class AdminController {
   constructor(private readonly prisma: PrismaService, private readonly adminService: AdminService) {}
@@ -60,6 +83,29 @@ export class AdminController {
   async adminContent(@Headers('authorization') authorization?: string) {
     await this.adminService.requireAdmin(authorization)
     return this.prisma.content.findMany({ include: { tags: true }, orderBy: { updatedAt: 'desc' } })
+  }
+
+  @Post('admin/uploads/cover')
+  @UseInterceptors(FileInterceptor('file', { limits: { fileSize: 5 * 1024 * 1024 } }))
+  async uploadCover(
+    @Headers('authorization') authorization: string | undefined,
+    @UploadedFile() file: any,
+    @Query('type') type: ContentType = ContentType.article,
+  ) {
+    const admin = await this.adminService.requireAdmin(authorization)
+    if (!file) throw new BadRequestException('Cover file is required')
+    if (!allowedCoverMimeTypes.has(file.mimetype)) throw new BadRequestException('Only png, jpg, webp or svg images are allowed')
+    if (!['article', 'project'].includes(type)) throw new BadRequestException('type must be article or project')
+
+    const folder = type === ContentType.project ? 'projects' : 'articles'
+    const uploadDir = join(clientPublicRoot(), 'assets', 'images', 'uploads', folder)
+    mkdirSync(uploadDir, { recursive: true })
+    const filename = `${type}-cover-${Date.now()}-${randomBytes(4).toString('hex')}${safeCoverExtension(file)}`
+    const target = join(uploadDir, filename)
+    writeFileSync(target, file.buffer)
+    const url = `/assets/images/uploads/${folder}/${filename}`
+    await this.adminService.audit(admin.id, 'upload_cover', 'asset', filename, { type, url })
+    return { url }
   }
 
   @Post('admin/content')

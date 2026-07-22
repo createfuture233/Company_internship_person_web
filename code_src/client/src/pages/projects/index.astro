@@ -54,59 +54,38 @@ const pageNumbers = Array.from({ length: totalPages }, (_, index) => index + 1);
       ) : projects.length ? (
         <>
           <div class="project-grid">
-            {pagedProjects.map((project, index) => (
-              <a
-                class={`project-card project-${(index % 2) + 1} reveal-link`}
-                href={`/projects/${project.slug}`}
-              >
-                <img
-                  class="content-cover-thumb"
-                  src={resolveCover("project", project.slug || project.id, project.coverUrl)}
-                  alt={`${project.title} 封面图`}
-                  loading="lazy"
-                />
-                <p>{project.tags[0]?.name ?? "项目作品"}</p>
-                <h3>{project.title}</h3>
-                <p>{project.summary}</p>
-                <span>{project.stack ?? "持续迭代中"}</span>
-              </a>
-            ))}
+            {pagedProjects.map((project, index) => {
+              const coverIndex = (currentPage - 1) * pageSize + index;
+              return (
+                <a
+                  class={`project-card project-${(index % 2) + 1} reveal-link`}
+                  href={`/projects/${project.slug}`}
+                >
+                  <img
+                    class="content-cover-thumb"
+                    src={resolveCover("project", project.coverUrl, coverIndex)}
+                    alt={`${project.title} 封面图`}
+                    loading="lazy"
+                  />
+                  <p>{project.tags[0]?.name ?? "项目作品"}</p>
+                  <h3>{project.title}</h3>
+                  <p>{project.summary}</p>
+                  <span>{project.stack ?? "持续迭代中"}</span>
+                </a>
+              );
+            })}
           </div>
           {totalPages > 1 && (
             <nav class="pagination" aria-label="作品分页">
-              <a
-                class={currentPage === 1 ? "disabled" : ""}
-                href={currentPage === 1 ? undefined : "/projects?page=1"}
-              >
-                第一页
-              </a>
-              <a
-                class={currentPage === 1 ? "disabled" : ""}
-                href={currentPage === 1 ? undefined : `/projects?page=${currentPage - 1}`}
-              >
-                上一页
-              </a>
+              <a class={currentPage === 1 ? "disabled" : ""} href={currentPage === 1 ? undefined : "/projects?page=1"}>第一页</a>
+              <a class={currentPage === 1 ? "disabled" : ""} href={currentPage === 1 ? undefined : `/projects?page=${currentPage - 1}`}>上一页</a>
               {pageNumbers.map((page) => (
-                <a
-                  class={page === currentPage ? "active" : ""}
-                  href={`/projects?page=${page}`}
-                  aria-current={page === currentPage ? "page" : undefined}
-                >
+                <a class={page === currentPage ? "active" : ""} href={`/projects?page=${page}`} aria-current={page === currentPage ? "page" : undefined}>
                   {page}
                 </a>
               ))}
-              <a
-                class={currentPage === totalPages ? "disabled" : ""}
-                href={currentPage === totalPages ? undefined : `/projects?page=${currentPage + 1}`}
-              >
-                下一页
-              </a>
-              <a
-                class={currentPage === totalPages ? "disabled" : ""}
-                href={currentPage === totalPages ? undefined : `/projects?page=${totalPages}`}
-              >
-                最后一页
-              </a>
+              <a class={currentPage === totalPages ? "disabled" : ""} href={currentPage === totalPages ? undefined : `/projects?page=${currentPage + 1}`}>下一页</a>
+              <a class={currentPage === totalPages ? "disabled" : ""} href={currentPage === totalPages ? undefined : `/projects?page=${totalPages}`}>最后一页</a>
             </nav>
           )}
         </>
