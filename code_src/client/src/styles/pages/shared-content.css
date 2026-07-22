@@ -24,4 +24,60 @@
 :root[data-theme='light'] .stat-grid strong,:root[data-theme='light'] .explore-grid span,:root[data-theme='light'] .explore-grid svg,:root[data-theme='light'] .process-grid span,:root[data-theme='light'] .timeline span,:root[data-theme='light'] .topic-grid span { color:var(--accent); }
 :root[data-theme='light'] .timeline article,:root[data-theme='light'] .process-grid article { border-left-color:var(--accent); background:linear-gradient(90deg,#ee704c12,transparent); }
 :root[data-theme='light'] .topic-grid span { background:transparent; }
+.pagination {
+  display:flex;
+  flex-wrap:wrap;
+  justify-content:center;
+  align-items:center;
+  gap:.65rem;
+  margin:42px auto 0;
+}
+.pagination a,
+.pagination button {
+  min-width:2.6rem;
+  min-height:2.6rem;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  padding:.65rem .95rem;
+  border:1px solid var(--line);
+  border-radius:999px;
+  color:var(--muted);
+  background:var(--panel);
+  box-shadow:0 .65rem 1.4rem color-mix(in srgb,var(--ink) 7%,transparent);
+  font:inherit;
+  cursor:pointer;
+  transition:transform .2s ease,border-color .2s ease,color .2s ease,background .2s ease,box-shadow .2s ease;
+}
+.pagination a:hover:not(.disabled),
+.pagination button:hover:not(:disabled),
+.pagination a.active,
+.pagination button.active {
+  color:var(--cyan);
+  border-color:var(--cyan);
+  background:color-mix(in srgb,var(--cyan) 10%,var(--panel));
+  box-shadow:0 .9rem 1.8rem color-mix(in srgb,var(--cyan) 16%,transparent);
+  transform:translateY(-2px);
+}
+.pagination a.disabled,
+.pagination button:disabled {
+  pointer-events:none;
+  opacity:.42;
+  cursor:not-allowed;
+}
+:root[data-theme='light'] .pagination a,
+:root[data-theme='light'] .pagination button {
+  color:var(--muted);
+  background:var(--surface);
+  box-shadow:var(--shadow);
+}
+:root[data-theme='light'] .pagination a:hover:not(.disabled),
+:root[data-theme='light'] .pagination button:hover:not(:disabled),
+:root[data-theme='light'] .pagination a.active,
+:root[data-theme='light'] .pagination button.active {
+  color:var(--accent);
+  border-color:var(--accent);
+  background:#fff8f0;
+  box-shadow:0 16px 34px #ee704c1b;
+}
 @media (max-width:720px) { .content-band,.detail-block { padding:65px 25px; } .content-band h2 { font-size:33px; } .stat-grid,.timeline,.process-grid,.explore-grid { grid-template-columns:1fr; } }

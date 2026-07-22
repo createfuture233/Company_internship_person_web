@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Eye, EyeOff, Heart, Trash2 } from "lucide-react";
 import { apiBase } from "../lib/api";
+import Pagination from "./Pagination";
 
 type ContentType = "article" | "project";
 type Item = {
@@ -27,12 +28,20 @@ export default function AdminComments() {
   const [contentId, setContentId] = useState("");
   const [sort, setSort] = useState<"latest" | "likes">("latest");
   const [notice, setNotice] = useState("");
+  const [page, setPage] = useState(1);
+  const pageSize = 5;
   const headers = () => ({
     Authorization: `Bearer ${localStorage.getItem("personal-planet-admin-token")}`,
   });
   const selectableContents = contentType
     ? contents.filter((item) => item.type === contentType)
     : contents;
+  const totalPages = Math.max(1, Math.ceil(items.length / pageSize));
+  const currentPage = Math.min(page, totalPages);
+  const pagedItems = items.slice(
+    (currentPage - 1) * pageSize,
+    currentPage * pageSize,
+  );
 
   const load = () => {
     const query = new URLSearchParams();
@@ -57,6 +66,7 @@ export default function AdminComments() {
   }, []);
   useEffect(() => {
     load();
+    setPage(1);
   }, [status, contentType, contentId, sort]);
 
   function chooseType(next: ContentType | "") {
@@ -148,7 +158,7 @@ export default function AdminComments() {
       </div>
       {notice && <p className="admin-notice">{notice}</p>}
       <div className="admin-list">
-        {items.map((item) => (
+        {pagedItems.map((item) => (
           <article key={item.id}>
             <div>
               <strong>{item.nickname}</strong>
@@ -187,6 +197,12 @@ export default function AdminComments() {
       {!items.length && (
         <p className="admin-state">没有符合当前筛选条件的评论。</p>
       )}
+      <Pagination
+        currentPage={currentPage}
+        totalPages={totalPages}
+        onPageChange={setPage}
+        label="评论分页"
+      />
     </section>
   );
 }

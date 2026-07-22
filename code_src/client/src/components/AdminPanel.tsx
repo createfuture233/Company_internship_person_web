@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import { apiBase } from "../lib/api";
 import MarkdownRenderer from "./MarkdownRenderer";
+import Pagination from "./Pagination";
 
 type ContentType = "article" | "project";
 type ContentStatus = "draft" | "published" | "archived";
@@ -98,6 +99,8 @@ export default function AdminPanel({
   const [statusFilter, setStatusFilter] = useState<"all" | ContentStatus>(
     "all",
   );
+  const [page, setPage] = useState(1);
+  const pageSize = 5;
   const typeName = contentType === "article" ? "文章" : "作品";
 
   const headers = () => ({
@@ -142,6 +145,16 @@ export default function AdminPanel({
       ? items
       : items.filter((item) => item.status === statusFilter);
   }, [items, statusFilter]);
+  const totalPages = Math.max(1, Math.ceil(visibleItems.length / pageSize));
+  const currentPage = Math.min(page, totalPages);
+  const pagedItems = visibleItems.slice(
+    (currentPage - 1) * pageSize,
+    currentPage * pageSize,
+  );
+
+  useEffect(() => {
+    setPage(1);
+  }, [contentType, statusFilter]);
 
   function editItem(item: ContentItem) {
     setForm(toForm(item));
@@ -282,7 +295,7 @@ export default function AdminPanel({
               </tr>
             </thead>
             <tbody>
-              {visibleItems.map((item) => (
+              {pagedItems.map((item) => (
                 <tr key={item.id}>
                   <td className="admin-table-main">
                     <strong>{item.title}</strong>
@@ -352,6 +365,12 @@ export default function AdminPanel({
             <p className="admin-state">暂无符合当前筛选条件的{typeName}。</p>
           )}
         </div>
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={setPage}
+          label={`${typeName}分页`}
+        />
       </section>
     );
 

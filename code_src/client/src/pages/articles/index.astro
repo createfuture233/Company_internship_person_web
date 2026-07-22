@@ -13,6 +13,7 @@ type Article = {
 
 let articles: Article[] = [];
 let loadError = false;
+
 try {
   const response = await fetch(`${apiBase}/articles`);
   if (!response.ok) throw new Error("Unable to load articles");
@@ -27,6 +28,18 @@ const formatDate = (value: string | null) =>
         new Date(value),
       )
     : "持续更新";
+
+const pageSize = 9;
+const requestedPage = Number(Astro.url.searchParams.get("page") ?? "1");
+const totalPages = Math.max(1, Math.ceil(articles.length / pageSize));
+const currentPage = Number.isFinite(requestedPage)
+  ? Math.min(Math.max(1, Math.trunc(requestedPage)), totalPages)
+  : 1;
+const pagedArticles = articles.slice(
+  (currentPage - 1) * pageSize,
+  currentPage * pageSize,
+);
+const pageNumbers = Array.from({ length: totalPages }, (_, index) => index + 1);
 ---
 
 <BaseLayout title="文章｜个人星球">
@@ -42,26 +55,65 @@ const formatDate = (value: string | null) =>
       loadError ? (
         <p class="empty">文章暂时无法加载，请确认后端服务已经启动。</p>
       ) : articles.length ? (
-        <div class="article-grid">
-          {articles.map((article, index) => (
-            <article class="article-card">
-              <div
-                class={`article-illustration illustration-${(index % 3) + 1}`}
-              >
-                <span>{article.tags[0]?.name ?? "文章"}</span>
-              </div>
-              <p class="meta">{formatDate(article.publishedAt)} · 阅读文章</p>
-              <h3>{article.title}</h3>
-              <p>{article.summary}</p>
+        <>
+          <div class="article-grid">
+            {pagedArticles.map((article, index) => (
+              <article class="article-card">
+                <div
+                  class={`article-illustration illustration-${(index % 3) + 1}`}
+                >
+                  <span>{article.tags[0]?.name ?? "文章"}</span>
+                </div>
+                <p class="meta">{formatDate(article.publishedAt)} · 阅读文章</p>
+                <h3>{article.title}</h3>
+                <p>{article.summary}</p>
+                <a
+                  class="text-button reveal-link"
+                  href={`/articles/${article.id}`}
+                >
+                  阅读文章 ↗
+                </a>
+              </article>
+            ))}
+          </div>
+          {totalPages > 1 && (
+            <nav class="pagination" aria-label="文章分页">
               <a
-                class="text-button reveal-link"
-                href={`/articles/${article.id}`}
+                class={currentPage === 1 ? "disabled" : ""}
+                href={currentPage === 1 ? undefined : "/articles?page=1"}
               >
-                阅读文章 →
+                第一页
               </a>
-            </article>
-          ))}
-        </div>
+              <a
+                class={currentPage === 1 ? "disabled" : ""}
+                href={currentPage === 1 ? undefined : `/articles?page=${currentPage - 1}`}
+              >
+                上一页
+              </a>
+              {pageNumbers.map((page) => (
+                <a
+                  class={page === currentPage ? "active" : ""}
+                  href={`/articles?page=${page}`}
+                  aria-current={page === currentPage ? "page" : undefined}
+                >
+                  {page}
+                </a>
+              ))}
+              <a
+                class={currentPage === totalPages ? "disabled" : ""}
+                href={currentPage === totalPages ? undefined : `/articles?page=${currentPage + 1}`}
+              >
+                下一页
+              </a>
+              <a
+                class={currentPage === totalPages ? "disabled" : ""}
+                href={currentPage === totalPages ? undefined : `/articles?page=${totalPages}`}
+              >
+                最后一页
+              </a>
+            </nav>
+          )}
+        </>
       ) : (
         <p class="empty">暂时还没有已发布的文章。</p>
       )
