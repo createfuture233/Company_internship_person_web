@@ -1,0 +1,16 @@
+{
+  "name": "个人星球",
+  "short_name": "个人星球",
+  "description": "个人星球：记录作品、文章、思考与成长。",
+  "icons": [
+    {
+      "src": "/assets/icons/personal-planet-favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ],
+  "theme_color": "#fff8eb",
+  "background_color": "#fff8eb",
+  "display": "standalone"
+}
