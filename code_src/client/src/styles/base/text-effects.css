@@ -1,0 +1,22 @@
+/* Text reacts directly to pointer proximity and hover. */
+.variable-proximity .variable-proximity-word > span {
+  display:inline-block;
+  color:color-mix(in srgb, currentColor calc(var(--proximity-opacity, 1) * 100%), var(--cyan));
+  opacity:var(--proximity-opacity, 1);
+  transform:translateY(var(--proximity-lift, 0)) scale(var(--proximity-scale, 1)) rotate(var(--proximity-rotate, 0deg));
+  text-shadow:0 0 var(--proximity-glow, 0) color-mix(in srgb, var(--cyan) 68%, transparent);
+  transition:transform .12s ease-out, color .12s ease-out, opacity .12s ease-out, text-shadow .12s ease-out;
+  will-change:transform, color, font-variation-settings;
+}
+main :is(h1, h2, h3, p, a, li) {
+  transition:color .22s ease, transform .22s cubic-bezier(.16,1,.3,1), letter-spacing .22s ease, text-shadow .22s ease;
+}
+main :is(h1, h2, h3, p, a, li):hover {
+  color:var(--cyan);
+  letter-spacing:.018em;
+  text-shadow:0 0 18px color-mix(in srgb, var(--cyan) 42%, transparent);
+}
+:root[data-theme='light'] main :is(h1, h2, h3, p, a, li):hover {
+  color:var(--accent);
+  text-shadow:0 8px 20px #ee704c2b;
+}
