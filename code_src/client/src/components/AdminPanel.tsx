@@ -75,12 +75,34 @@ function publicHref(item: Pick<ContentItem, "type" | "id" | "slug">) {
     : `/projects/${item.slug}`;
 }
 
-function formatDate(value?: string | null) {
-  if (!value) return "未记录";
-  return new Intl.DateTimeFormat("zh-CN", {
-    dateStyle: "medium",
-    timeStyle: "short",
-  }).format(new Date(value));
+function formatDateParts(value?: string | null) {
+  if (!value) return { date: "未记录", time: "--:--" };
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return { date: "未记录", time: "--:--" };
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  const hour = String(date.getHours()).padStart(2, "0");
+  const minute = String(date.getMinutes()).padStart(2, "0");
+  return { date: `${month}.${day}`, time: `${hour}:${minute}` };
+}
+
+function DateBadge({ value }: { value?: string | null }) {
+  const parts = formatDateParts(value);
+  const full = value
+    ? new Intl.DateTimeFormat("zh-CN", {
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+        hour: "2-digit",
+        minute: "2-digit",
+      }).format(new Date(value))
+    : "未记录";
+  return (
+    <time className="admin-date-badge" dateTime={value ?? undefined} title={full}>
+      <span>{parts.date}</span>
+      <strong>{parts.time}</strong>
+    </time>
+  );
 }
 
 function wordCount(value: string) {
@@ -359,8 +381,12 @@ export default function AdminPanel({
                       )}
                     </div>
                   </td>
-                  <td>{formatDate(item.createdAt)}</td>
-                  <td>{formatDate(item.updatedAt)}</td>
+                  <td className="admin-date-cell">
+                    <DateBadge value={item.createdAt} />
+                  </td>
+                  <td className="admin-date-cell">
+                    <DateBadge value={item.updatedAt} />
+                  </td>
                   <td>
                     <div className="admin-table-row-actions">
                       {item.status === "published" && (
