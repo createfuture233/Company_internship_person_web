@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import type { FormEvent } from "react";
-import { Save } from "lucide-react";
+import { Plus, Save } from "lucide-react";
 import { apiBase } from "../lib/api";
 type Item = { key: string; value: string };
 const defaults = [
@@ -67,7 +67,8 @@ export default function AdminSettings() {
                     </div>
                 ))}
                 <div className="admin-save-row">
-                    <button type="button" onClick={add}>
+                    <button className="admin-add-setting-button" type="button" onClick={add}>
+                        <Plus size={17} />
                         新增设置项
                     </button>
                     <button className="comment-submit" type="submit">

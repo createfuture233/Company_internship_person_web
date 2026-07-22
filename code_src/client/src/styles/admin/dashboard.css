@@ -257,3 +257,159 @@
   .admin-table-actions select,
   .admin-table-actions button { flex: 1; }
 }
+
+/* Admin overview analytics */
+.admin-overview .admin-intro { max-width: 48rem; }
+.overview-stats a { position: relative; overflow: hidden; }
+.overview-stats a::after { content: ''; position: absolute; inset: auto -20% -55% 45%; height: 6rem; border-radius: 50%; opacity: .28; filter: blur(14px); background: var(--overview-glow, var(--accent)); }
+.overview-stat-orange { --overview-glow: #ee704c; }
+.overview-stat-green { --overview-glow: #68d391; }
+.overview-stat-cyan { --overview-glow: #54e8ff; }
+.overview-stat-pink { --overview-glow: #ff7aa8; }
+.overview-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; margin-top: 1.15rem; }
+.overview-card { position: relative; overflow: hidden; padding: 1.25rem; border: 1px solid var(--line); border-radius: 1.35rem; background: radial-gradient(circle at 12% 0%, color-mix(in srgb, var(--accent) 12%, transparent), transparent 32%), color-mix(in srgb, var(--surface) 92%, transparent); box-shadow: 0 1.1rem 2.4rem color-mix(in srgb, var(--ink) 8%, transparent); }
+.overview-card::before { content: ''; position: absolute; inset: 0; pointer-events: none; background: linear-gradient(135deg, #ffffff18, transparent 38%); }
+.overview-card-large, .overview-card-wide { grid-column: span 2; }
+.overview-card-head { position: relative; z-index: 1; display: flex; align-items: center; justify-content: space-between; gap: 1rem; margin-bottom: 1rem; }
+.overview-card-head span { display: inline-flex; align-items: center; gap: .45rem; color: var(--ink); font-weight: 900; }
+.overview-card-head small { display: inline-flex; align-items: center; gap: .25rem; color: var(--muted); font-size: .82rem; }
+.overview-chart-row { position: relative; z-index: 1; display: grid; grid-template-columns: 12rem minmax(0, 1fr); gap: 1.25rem; align-items: center; }
+.overview-chart-row p { margin: .85rem 0 0; color: var(--muted); }
+.overview-donut { width: 10.5rem; aspect-ratio: 1; display: grid; place-items: center; align-content: center; border-radius: 50%; box-shadow: inset 0 0 0 1.25rem color-mix(in srgb, var(--surface) 90%, transparent), 0 1rem 2rem color-mix(in srgb, var(--ink) 10%, transparent); }
+.overview-donut span { color: var(--ink); font-size: 2.2rem; font-weight: 950; line-height: 1; }
+.overview-donut small { color: var(--muted); font-size: .76rem; }
+.overview-bars { position: relative; z-index: 1; display: grid; gap: .82rem; }
+.overview-bars > div { display: grid; grid-template-columns: 4.5rem minmax(0, 1fr) 2.5rem; align-items: center; gap: .75rem; }
+.overview-bars span { color: var(--muted); font-size: .9rem; }
+.overview-bars i { height: .72rem; overflow: hidden; border-radius: 999px; background: color-mix(in srgb, var(--line) 66%, transparent); }
+.overview-bars b { display: block; height: 100%; border-radius: inherit; box-shadow: 0 0 1rem currentColor; }
+.overview-bars strong { color: var(--ink); text-align: right; }
+.overview-trend { position: relative; z-index: 1; min-height: 15rem; padding: 1rem 0 1.9rem; }
+.overview-trend svg { position: absolute; inset: 0 0 2.2rem; width: 100%; height: calc(100% - 2.2rem); }
+.overview-trend path { fill: none; stroke: var(--accent); stroke-width: 2.8; vector-effect: non-scaling-stroke; filter: drop-shadow(0 0 8px color-mix(in srgb, var(--accent) 45%, transparent)); }
+.overview-trend-bars { position: absolute; inset: 0; display: grid; grid-template-columns: repeat(7, 1fr); align-items: end; gap: .6rem; }
+.overview-trend-bars span { position: relative; min-height: .8rem; border-radius: .8rem .8rem .2rem .2rem; background: linear-gradient(180deg, color-mix(in srgb, var(--accent) 55%, transparent), color-mix(in srgb, var(--accent) 12%, transparent)); }
+.overview-trend-bars em { position: absolute; left: 50%; bottom: -1.55rem; color: var(--muted); font-style: normal; font-size: .72rem; transform: translateX(-50%); }
+.overview-card-insight ul { position: relative; z-index: 1; display: grid; gap: .75rem; margin: 0; padding: 0; list-style: none; }
+.overview-card-insight li { padding: .75rem .85rem; border: 1px solid color-mix(in srgb, var(--accent) 18%, var(--line)); border-radius: .9rem; color: var(--muted); background: color-mix(in srgb, var(--accent) 5%, var(--surface)); line-height: 1.65; }
+:root[data-theme='dark'] .overview-card { background: radial-gradient(circle at 12% 0%, rgba(74, 225, 255, .13), transparent 34%), color-mix(in srgb, var(--panel-solid) 86%, transparent); box-shadow: 0 1.2rem 2.8rem rgba(0, 0, 0, .26); }
+:root[data-theme='dark'] .overview-trend path { stroke: var(--cyan); }
+:root[data-theme='dark'] .overview-trend-bars span { background: linear-gradient(180deg, rgba(84, 232, 255, .55), rgba(84, 232, 255, .1)); }
+@media (max-width: 860px) { .overview-grid, .overview-chart-row { grid-template-columns: 1fr; } .overview-card-large, .overview-card-wide { grid-column: auto; } .overview-donut { width: 9rem; margin: 0 auto; } }
+
+/* Admin settings actions */
+.admin-save-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: .8rem;
+  margin-top: .7rem;
+}
+
+.admin-add-setting-button {
+  position: relative;
+  isolation: isolate;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: .5rem;
+  min-height: 2.85rem;
+  padding: .78rem 1.15rem;
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--accent) 28%, var(--line));
+  border-radius: 999px;
+  color: var(--ink);
+  background:
+    radial-gradient(circle at 18% 18%, rgba(255, 255, 255, .78), transparent 30%),
+    linear-gradient(135deg,
+      color-mix(in srgb, var(--accent) 18%, var(--surface)),
+      color-mix(in srgb, var(--surface) 92%, #fff));
+  box-shadow:
+    0 14px 32px color-mix(in srgb, var(--accent) 16%, transparent),
+    inset 0 1px 0 rgba(255, 255, 255, .65);
+  font: inherit;
+  font-weight: 900;
+  letter-spacing: .02em;
+  cursor: pointer;
+  transition:
+    transform .22s ease,
+    box-shadow .22s ease,
+    border-color .22s ease,
+    background .22s ease,
+    color .22s ease;
+}
+
+.admin-add-setting-button::before {
+  content: '';
+  position: absolute;
+  inset: -45% auto auto -25%;
+  z-index: -1;
+  width: 5.5rem;
+  height: 5.5rem;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--accent) 24%, transparent);
+  filter: blur(14px);
+  opacity: .72;
+  transition: transform .28s ease, opacity .28s ease;
+}
+
+.admin-add-setting-button svg {
+  padding: .18rem;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--accent) 20%, #fff);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--accent) 18%, transparent);
+  transition: transform .24s ease, background .24s ease;
+}
+
+.admin-add-setting-button:hover {
+  transform: translateY(-3px);
+  border-color: color-mix(in srgb, var(--accent) 58%, var(--line));
+  color: color-mix(in srgb, var(--accent) 82%, var(--ink));
+  box-shadow:
+    0 18px 42px color-mix(in srgb, var(--accent) 25%, transparent),
+    inset 0 1px 0 rgba(255, 255, 255, .76);
+}
+
+.admin-add-setting-button:hover::before {
+  transform: translate(1.6rem, .5rem) scale(1.12);
+  opacity: .95;
+}
+
+.admin-add-setting-button:hover svg {
+  transform: rotate(90deg) scale(1.06);
+  background: color-mix(in srgb, var(--accent) 28%, #fff);
+}
+
+.admin-add-setting-button:active {
+  transform: translateY(-1px) scale(.99);
+}
+
+:root[data-theme='dark'] .admin-add-setting-button {
+  color: #dff8ff;
+  border-color: rgba(84, 232, 255, .32);
+  background:
+    radial-gradient(circle at 20% 0%, rgba(84, 232, 255, .22), transparent 34%),
+    linear-gradient(135deg, rgba(84, 232, 255, .12), rgba(164, 119, 255, .14)),
+    color-mix(in srgb, var(--panel-solid) 88%, transparent);
+  box-shadow:
+    0 16px 38px rgba(84, 232, 255, .14),
+    inset 0 1px 0 rgba(255, 255, 255, .1);
+}
+
+:root[data-theme='dark'] .admin-add-setting-button::before {
+  background: rgba(84, 232, 255, .26);
+}
+
+:root[data-theme='dark'] .admin-add-setting-button svg {
+  color: #07111e;
+  background: linear-gradient(135deg, #54e8ff, #a477ff);
+}
+
+:root[data-theme='dark'] .admin-add-setting-button:hover {
+  color: #ffffff;
+  border-color: rgba(84, 232, 255, .7);
+  box-shadow:
+    0 20px 48px rgba(84, 232, 255, .22),
+    0 0 0 1px rgba(84, 232, 255, .12) inset;
+}

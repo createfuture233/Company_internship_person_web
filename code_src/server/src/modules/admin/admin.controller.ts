@@ -135,13 +135,85 @@ export class AdminController {
   @Get('admin/overview')
   async adminOverview(@Headers('authorization') authorization?: string) {
     await this.adminService.requireAdmin(authorization)
-    const [articles, projects, comments, unreadMessages] = await Promise.all([
-      this.prisma.content.count({ where: { type: ContentType.article } }),
-      this.prisma.content.count({ where: { type: ContentType.project } }),
-      this.prisma.comment.count({ where: { status: CommentStatus.visible } }),
-      this.prisma.contactMessage.count({ where: { status: 'unread' } }),
+    const [contents, comments, messages] = await Promise.all([
+      this.prisma.content.findMany({
+        select: { type: true, status: true, createdAt: true, updatedAt: true },
+      }),
+      this.prisma.comment.findMany({
+        select: { status: true, likes: true, createdAt: true, content: { select: { type: true } } },
+      }),
+      this.prisma.contactMessage.findMany({
+        select: { status: true, createdAt: true },
+      }),
     ])
-    return { articles, projects, comments, unreadMessages }
+
+    const contentStatus = { draft: 0, published: 0, archived: 0 }
+    const contentTypes = { article: 0, project: 0 }
+    for (const item of contents) {
+      contentTypes[item.type] += 1
+      contentStatus[item.status] += 1
+    }
+
+    const commentStatus = { visible: 0, hidden: 0, spam: 0 }
+    const commentByContent = { article: 0, project: 0 }
+    let totalLikes = 0
+    for (const item of comments) {
+      commentStatus[item.status] += 1
+      commentByContent[item.content.type] += 1
+      totalLikes += item.likes
+    }
+
+    const messageStatus = { unread: 0, read: 0, replied: 0, archived: 0 }
+    for (const item of messages) {
+      if (item.status in messageStatus) messageStatus[item.status as keyof typeof messageStatus] += 1
+    }
+
+    const dayKeys = Array.from({ length: 7 }, (_, index) => {
+      const date = new Date()
+      date.setHours(0, 0, 0, 0)
+      date.setDate(date.getDate() - (6 - index))
+      return date.toISOString().slice(0, 10)
+    })
+    const trend = dayKeys.map((date) => ({ date, contents: 0, comments: 0, messages: 0 }))
+    const addTrend = (value: string | null | undefined, key: 'contents' | 'comments' | 'messages') => {
+      if (!value) return
+      const date = new Date(value)
+      if (Number.isNaN(date.getTime())) return
+      const day = date.toISOString().slice(0, 10)
+      const bucket = trend.find((item) => item.date === day)
+      if (bucket) bucket[key] += 1
+    }
+    contents.forEach((item) => addTrend(item.createdAt, 'contents'))
+    comments.forEach((item) => addTrend(item.createdAt, 'comments'))
+    messages.forEach((item) => addTrend(item.createdAt, 'messages'))
+
+    const totalInteractions = comments.length + messages.length
+    const responseRate = messages.length ? Math.round(((messages.length - messageStatus.unread) / messages.length) * 100) : 0
+
+    return {
+      articles: contentTypes.article,
+      projects: contentTypes.project,
+      comments: commentStatus.visible,
+      unreadMessages: messageStatus.unread,
+      totals: {
+        contents: contents.length,
+        comments: comments.length,
+        messages: messages.length,
+        interactions: totalInteractions,
+        likes: totalLikes,
+      },
+      contentStatus,
+      contentTypes,
+      commentStatus,
+      commentByContent,
+      messageStatus,
+      trend,
+      insights: {
+        responseRate,
+        averageLikes: comments.length ? Number((totalLikes / comments.length).toFixed(1)) : 0,
+        publishedRate: contents.length ? Math.round((contentStatus.published / contents.length) * 100) : 0,
+      },
+    }
   }
 
   @Get('admin/comments')

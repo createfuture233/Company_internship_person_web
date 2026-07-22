@@ -3,6 +3,7 @@ type PaginationProps = {
   totalPages: number
   onPageChange: (page: number) => void
   label?: string
+  alwaysShow?: boolean
 }
 
 export default function Pagination({
@@ -10,8 +11,9 @@ export default function Pagination({
   totalPages,
   onPageChange,
   label = '分页',
+  alwaysShow = false,
 }: PaginationProps) {
-  if (totalPages <= 1) return null
+  if (!alwaysShow && totalPages <= 1) return null
 
   const pages = Array.from({ length: totalPages }, (_, index) => index + 1)
 

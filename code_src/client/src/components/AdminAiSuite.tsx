@@ -259,10 +259,11 @@ export default function AdminAiSuiteV3() {
       {busy === 'upload' && <LoadingLine label="正在读取并上传文件..." />}
       {uploaded && <div className="admin-ai-preview"><strong>{uploaded.originalName}</strong><span>{uploaded.fileSize} bytes</span><p>{uploaded.parsedText.slice(0, 1200)}</p></div>}
       {busy === 'file-analysis' && <LoadingLine label="AI 正在分析这个文件，请稍等..." />}
-      {fileAnalysis && <article className="admin-ai-analysis"><h3>AI 文件分析</h3><p>{fileAnalysis}</p></article>}
+      {fileAnalysis && <article className="admin-ai-analysis"><h3>AI 文件分析</h3> <MarkdownRenderer content={fileAnalysis} /></article>}
       {uploaded && <div className="admin-ai-oneclick">
         <button type="button" disabled={Boolean(busy)} onClick={() => generateDraft('article', aiPrompts.admin.buildOneClickPrompt('article', fileAnalysis))}><Sparkles size={17} />一键生成文章</button>
         <button type="button" disabled={Boolean(busy)} onClick={() => generateDraft('project', aiPrompts.admin.buildOneClickPrompt('project', fileAnalysis))}><Sparkles size={17} />一键生成作品</button>
+        {busy === 'generate' && <LoadingLine label="AI 正在生成内容，可能需要几十秒..." />}
       </div>}
     </div>}
 
