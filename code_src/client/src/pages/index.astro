@@ -2,47 +2,168 @@
 import BaseLayout from "../layouts/BaseLayout.astro";
 import ProximityHeading from "../components/ProximityHeading";
 import AdminPlanetLogin from "../components/AdminPlanetLogin";
+import { apiBase } from "../lib/api";
+
+type Tag = { name: string };
+type ContentItem = {
+  id: string;
+  slug?: string | null;
+  type: "article" | "project";
+  title: string;
+  summary: string;
+  stack?: string | null;
+  publishedAt?: string | null;
+  tags?: Tag[];
+  _count?: { comments?: number };
+};
+
+let articles: ContentItem[] = [];
+let projects: ContentItem[] = [];
+let loadError = false;
+
+try {
+  const [articleResponse, projectResponse] = await Promise.all([
+    fetch(`${apiBase}/articles`),
+    fetch(`${apiBase}/projects`),
+  ]);
+
+  if (!articleResponse.ok || !projectResponse.ok) {
+    throw new Error("Unable to load home statistics");
+  }
+
+  articles = await articleResponse.json();
+  projects = await projectResponse.json();
+} catch {
+  loadError = true;
+}
+
+const allContent = [...articles, ...projects];
+const totalComments = allContent.reduce(
+  (sum, item) => sum + (item._count?.comments ?? 0),
+  0,
+);
+const tagNames = Array.from(
+  new Set(allContent.flatMap((item) => item.tags?.map((tag) => tag.name) ?? [])),
+);
+const latestArticle = articles[0];
+const latestProject = projects[0];
+const latestContent = allContent
+  .filter((item) => item.publishedAt)
+  .sort(
+    (a, b) =>
+      new Date(b.publishedAt ?? 0).getTime() -
+      new Date(a.publishedAt ?? 0).getTime(),
+  )[0];
+
+const twoDigits = (value: number) =>
+  value === 0 ? "00" : String(value).padStart(2, "0");
+
+const shortText = (value: string | undefined | null, fallback: string) =>
+  value && value.trim().length > 0 ? value.trim() : fallback;
+
+const formatDate = (value?: string | null) =>
+  value
+    ? new Intl.DateTimeFormat("zh-CN", {
+        month: "short",
+        day: "numeric",
+      }).format(new Date(value))
+    : "持续更新";
 ---
 
 <BaseLayout>
   <section class="hero">
-    <div class="orb orb-one"></div><div class="orb orb-two"></div><div
-      class="hero-copy"
-    >
-      <p class="eyebrow">WELCOME TO MY LITTLE PLANET</p><h1>
+    <div class="orb orb-one"></div>
+    <div class="orb orb-two"></div>
+    <div class="hero-copy">
+      <p class="eyebrow">WELCOME TO MY LITTLE PLANET</p>
+      <h1>
         <ProximityHeading client:load label="把生活的灵感 画进数字宇宙。" />
-      </h1><p class="lead">
+      </h1>
+      <p class="lead">
         你好，我是一名持续探索设计、代码与表达的人。这里收集我的作品、文章，以及尚未完成的想法。
-      </p><a class="primary-button" href="/articles">开始漫游 ↓</a>
-    </div><div class="hero-art">
-      <AdminPlanetLogin client:load /><div class="planet">
+      </p>
+      <a class="primary-button" href="/articles">开始漫游 ↓</a>
+    </div>
+    <div class="hero-art">
+      <AdminPlanetLogin client:load />
+      <div class="planet">
         <i></i><i></i><i></i>
-      </div><div class="orbit"><b>✦</b></div><p>
+      </div>
+      <div class="orbit"><b>✦</b></div>
+      <p>
         2026<br />PERSONAL<br />PLANET
       </p>
     </div>
   </section>
+
   <section class="content-band">
-    <p class="eyebrow">TRANSMISSION LOG</p><h2>
+    <p class="eyebrow">TRANSMISSION LOG</p>
+    <h2>
       <ProximityHeading client:load label="这个星球，正在缓慢生长。" />
-    </h2><p>
-      我把阅读、创作与技术实验留下来，作为下一次出发前可回望的坐标。
-    </p><div class="stat-grid">
-      <div><strong>03</strong><span>已发布文章</span></div><div>
-        <strong>02</strong><span>进行中作品</span>
-      </div><div><strong>∞</strong><span>待探索的灵感</span></div>
+    </h2>
+    <p>
+      {loadError
+        ? "数据库信号暂时没有连接成功，下面先显示默认占位；启动后端后会自动读取最新内容。"
+        : `目前已公开 ${articles.length} 篇文章、${projects.length} 个作品，累计收到 ${totalComments} 条评论信号。`}
+    </p>
+
+    <div class="stat-grid home-stat-grid">
+      <a class="home-stat-card" href="/articles">
+        <small>ARCHIVE / 01</small>
+        <strong>{twoDigits(articles.length)}</strong>
+        <span>已发布文章</span>
+        <p>
+          最近一篇：{shortText(latestArticle?.title, "等待下一篇记录")}
+        </p>
+        <em>{latestArticle ? formatDate(latestArticle.publishedAt) : "持续写作"}</em>
+      </a>
+
+      <a class="home-stat-card" href="/projects">
+        <small>BUILDING / 02</small>
+        <strong>{twoDigits(projects.length)}</strong>
+        <span>已发布作品</span>
+        <p>
+          最新作品：{shortText(latestProject?.title, "正在准备新的作品")}
+        </p>
+        <em>{latestProject?.stack ?? "技术栈持续扩展"}</em>
+      </a>
+
+      <a
+        class="home-stat-card"
+        href={latestContent?.type === "project"
+          ? `/projects/${latestContent.slug ?? latestContent.id}`
+          : latestContent
+            ? `/articles/${latestContent.id}`
+            : "/about"}
+      >
+        <small>SIGNAL / 03</small>
+        <strong>{tagNames.length || "∞"}</strong>
+        <span>内容标签与灵感</span>
+        <p>
+          {tagNames.length
+            ? `正在围绕 ${tagNames.slice(0, 3).join(" / ")} 等方向更新。`
+            : "等待更多主题被点亮。"}
+        </p>
+        <em>{totalComments} 条评论 · {allContent.length} 个公开内容</em>
+      </a>
     </div>
   </section>
+
   <section class="content-band home-links">
-    <p class="eyebrow">EXPLORE NEXT</p><div class="explore-grid">
-      <a href="/about"
-        ><span>01</span><h3>认识我</h3><p>关于经历、技能与正在探索的方向。</p><b
-          >↗</b
-        ></a
-      ><a href="/projects"
-        ><span>02</span><h3>查看作品</h3><p>从想法到界面的实践记录。</p><b>↗</b
-        ></a
-      >
+    <p class="eyebrow">EXPLORE NEXT</p>
+    <div class="explore-grid">
+      <a href="/about">
+        <span>01</span>
+        <h3>认识我</h3>
+        <p>关于经历、技能与正在探索的方向。</p>
+        <b>↗</b>
+      </a>
+      <a href="/projects">
+        <span>02</span>
+        <h3>查看作品</h3>
+        <p>从想法到界面的实践记录。</p>
+        <b>↗</b>
+      </a>
     </div>
   </section>
 </BaseLayout>
