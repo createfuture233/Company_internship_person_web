@@ -7,7 +7,11 @@
  */
 export const apiBase =
   import.meta.env.PUBLIC_API_BASE ??
-  (import.meta.env.PROD ? "/api" : "http://localhost:3000/api");
+  (import.meta.env.SSR
+    ? "http://127.0.0.1:3000/api"
+    : import.meta.env.PROD
+      ? "/api"
+      : "http://localhost:3000/api");
 
 export function apiUrl(path: string) {
   return apiBase + path;
