@@ -1,6 +1,31 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro'
 import ContactForm from '../components/ContactForm'
+
+const apiBase = import.meta.env.PUBLIC_API_BASE ?? 'http://localhost:3000/api'
+const fallbackSettings = {
+  contact_email: 'hello@example.com',
+  github_url: 'https://github.com',
+}
+
+let settings = fallbackSettings
+
+try {
+  const response = await fetch(`${apiBase}/settings`)
+  if (response.ok) {
+    const data = await response.json()
+    settings = {
+      contact_email: data.contact_email?.trim() || fallbackSettings.contact_email,
+      github_url: data.github_url?.trim() || fallbackSettings.github_url,
+    }
+  }
+} catch {
+  settings = fallbackSettings
+}
+
+const emailHref = settings.contact_email.startsWith('mailto:')
+  ? settings.contact_email
+  : `mailto:${settings.contact_email}`
 ---
 
 <BaseLayout title="联系｜个人星球">
@@ -9,8 +34,8 @@ import ContactForm from '../components/ContactForm'
       <p class="eyebrow">SAY HELLO</p>
       <h2>有一个有趣的想法？<br /><span>来信聊聊。</span></h2>
       <div class="contact-links">
-        <a href="mailto:hello@example.com">✉ hello@example.com</a>
-        <a href="https://github.com">◇ GitHub</a>
+        <a href={emailHref}>✉ {settings.contact_email.replace(/^mailto:/, '')}</a>
+        <a href={settings.github_url} target="_blank" rel="noreferrer">◇ GitHub</a>
       </div>
     </div>
     <ContactForm client:load />

@@ -327,6 +327,12 @@ export class AdminController {
     return this.prisma.siteSetting.findMany({ orderBy: { key: 'asc' } })
   }
 
+  @Get('settings')
+  async publicSettings() {
+    const settings = await this.prisma.siteSetting.findMany({ orderBy: { key: 'asc' } })
+    return Object.fromEntries(settings.map((item) => [item.key, item.value]))
+  }
+
   @Patch('admin/settings')
   async updateAdminSettings(@Headers('authorization') authorization: string | undefined, @Body() data: UpdateSettingsDto) {
     const admin = await this.adminService.requireAdmin(authorization)
