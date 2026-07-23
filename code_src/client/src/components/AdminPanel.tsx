@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import type { ChangeEvent } from "react";
 import {
   ArrowLeft,
@@ -127,6 +127,26 @@ export default function AdminPanel({
   const pageSize = 5;
   const typeName = contentType === "article" ? "文章" : "作品";
   const coverOptions = useMemo(() => getCoverOptions(contentType), [contentType]);
+  const [uploadedCovers, setUploadedCovers] = useState<string[]>([]);
+  const coverScrollerRef = useRef<HTMLDivElement | null>(null);
+  const coverTrackRef = useRef<HTMLDivElement | null>(null);
+  const coverSetWidthRef = useRef(0);
+  const coverOffsetRef = useRef(0);
+  const coverPausedRef = useRef(false);
+  const coverResumeAtRef = useRef(0);
+  const coverTransitionTimerRef = useRef<number | undefined>(undefined);
+  const [coverRepeatCount, setCoverRepeatCount] = useState(3);
+  const allCoverOptions = useMemo(
+    () => Array.from(new Set([...coverOptions, ...uploadedCovers])),
+    [coverOptions, uploadedCovers],
+  );
+  const loopedCoverOptions = useMemo(
+    () =>
+      Array.from({ length: coverRepeatCount }, (_, loopIndex) =>
+        allCoverOptions.map((cover) => ({ cover, loopIndex })),
+      ).flat(),
+    [allCoverOptions, coverRepeatCount],
+  );
 
   const headers = () => ({
     Authorization: `Bearer ${localStorage.getItem("personal-planet-admin-token")}`,
@@ -142,11 +162,22 @@ export default function AdminPanel({
     return scoped;
   };
 
+  const loadUploadedCovers = async () => {
+    const response = await fetch(
+      `${apiBase}/admin/uploads/covers?type=${contentType}`,
+      { headers: headers() },
+    );
+    if (!response.ok) return;
+    const data = (await response.json()) as { urls?: string[] };
+    setUploadedCovers(Array.isArray(data.urls) ? data.urls : []);
+  };
+
   useEffect(() => {
     if (!localStorage.getItem("personal-planet-admin-token")) {
       setMessage("请返回首页并点击右侧星球插画登录。");
       return;
     }
+    loadUploadedCovers().catch(() => undefined);
     load()
       .then((scoped) => {
         const requestedId = new URLSearchParams(window.location.search).get(
@@ -180,6 +211,91 @@ export default function AdminPanel({
   useEffect(() => {
     setPage(1);
   }, [contentType, statusFilter]);
+
+  useEffect(() => {
+    const scroller = coverScrollerRef.current;
+    const track = coverTrackRef.current;
+    if (!scroller || !track || !allCoverOptions.length) return;
+
+    const measure = () => {
+      // 每组之间同样有 gap，不能直接用总宽度除以副本数；否则循环重置点会逐渐漂移。
+      const firstCover = track.querySelector<HTMLButtonElement>("button");
+      const cardWidth = firstCover?.getBoundingClientRect().width ?? 0;
+      const gap = Number.parseFloat(getComputedStyle(track).gap) || 0;
+      const singleSetWidth = allCoverOptions.length * (cardWidth + gap);
+      coverSetWidthRef.current = singleSetWidth;
+      const neededCopies = Math.max(
+        3,
+        Math.ceil((scroller.clientWidth * 2) / Math.max(1, singleSetWidth)) + 1,
+      );
+      if (neededCopies !== coverRepeatCount) setCoverRepeatCount(neededCopies);
+    };
+
+    measure();
+    const observer = new ResizeObserver(measure);
+    observer.observe(scroller);
+    observer.observe(track);
+    return () => observer.disconnect();
+  }, [allCoverOptions.length, coverRepeatCount, mode]);
+
+  useEffect(() => {
+    const track = coverTrackRef.current;
+    if (!track || mode !== "edit" || allCoverOptions.length <= 1) return;
+
+    let frame = 0;
+    let lastTime = performance.now();
+    const speed = 22;
+
+    const tick = (time: number) => {
+      const delta = Math.min(48, time - lastTime);
+      lastTime = time;
+      const setWidth = coverSetWidthRef.current;
+      if (!coverPausedRef.current && time >= coverResumeAtRef.current && setWidth > 0) {
+        coverOffsetRef.current += (speed * delta) / 1000;
+        if (coverOffsetRef.current >= setWidth) {
+          coverOffsetRef.current -= setWidth;
+        }
+        track.style.transform = `translate3d(${-coverOffsetRef.current}px, 0, 0)`;
+      }
+      frame = window.requestAnimationFrame(tick);
+    };
+
+    frame = window.requestAnimationFrame(tick);
+    return () => {
+      window.cancelAnimationFrame(frame);
+      if (coverTransitionTimerRef.current) {
+        window.clearTimeout(coverTransitionTimerRef.current);
+      }
+    };
+  }, [allCoverOptions.length, mode, coverRepeatCount]);
+
+  function moveCoverSlide(direction: -1 | 1) {
+    const track = coverTrackRef.current;
+    if (!track) return;
+
+    const card = track.querySelector<HTMLButtonElement>("button");
+    const gap = Number.parseFloat(getComputedStyle(track).gap) || 0;
+    const step = (card?.getBoundingClientRect().width ?? 320) + gap;
+    const setWidth = coverSetWidthRef.current;
+
+    // 手动切换时先暂停自动滚动，避免两个动画同时修改 scrollLeft。
+    coverResumeAtRef.current = performance.now() + 1050;
+    let nextOffset = coverOffsetRef.current + direction * step;
+    if (setWidth > 0) {
+      while (nextOffset < 0) nextOffset += setWidth;
+      while (nextOffset >= setWidth) nextOffset -= setWidth;
+    }
+
+    if (coverTransitionTimerRef.current) {
+      window.clearTimeout(coverTransitionTimerRef.current);
+    }
+    track.style.transition = "transform 520ms cubic-bezier(.22, 1, .36, 1)";
+    coverOffsetRef.current = nextOffset;
+    track.style.transform = `translate3d(${-nextOffset}px, 0, 0)`;
+    coverTransitionTimerRef.current = window.setTimeout(() => {
+      track.style.transition = "";
+    }, 560);
+  }
 
   function editItem(item: ContentItem) {
     setForm(toForm(item));
@@ -257,6 +373,10 @@ export default function AdminPanel({
       setMessage("请选择图片文件作为封面。");
       return;
     }
+    if (file.size > 20 * 1024 * 1024) {
+      setMessage("封面图片不能超过 20MB，请压缩后再上传。");
+      return;
+    }
     const data = new FormData();
     data.append("file", file);
     setMessage("封面图片上传中...");
@@ -269,12 +389,26 @@ export default function AdminPanel({
           body: data,
         },
       );
-      if (!response.ok) throw new Error("upload failed");
+      if (!response.ok) {
+        const payload = await response.json().catch(() => null) as { message?: string | string[] } | null;
+        const detail = Array.isArray(payload?.message)
+          ? payload.message.join("；")
+          : payload?.message;
+        if (response.status === 401) {
+          localStorage.removeItem("personal-planet-admin-token");
+          throw new Error("管理员登录已失效，请重新登录后上传。");
+        }
+        throw new Error(detail || `上传请求失败（HTTP ${response.status}）`);
+      }
       const result = (await response.json()) as { url: string };
-      setForm({ ...form, coverUrl: result.url });
+      setUploadedCovers((current) =>
+        current.includes(result.url) ? current : [result.url, ...current],
+      );
+      setForm((current) => (current ? { ...current, coverUrl: result.url } : current));
       setMessage("封面图片已上传，保存内容后生效。");
-    } catch {
-      setMessage("封面上传失败，请确认后端服务和管理员登录状态。");
+    } catch (error) {
+      const detail = error instanceof Error ? error.message : "未知错误";
+      setMessage(`封面上传失败：${detail}`);
     } finally {
       event.currentTarget.value = "";
     }
@@ -508,18 +642,53 @@ export default function AdminPanel({
               src={resolveCover(contentType, form.coverUrl)}
               alt="当前封面预览"
             />
-            <div className="admin-cover-options">
-              {coverOptions.map((cover, index) => (
-                <button
-                  key={cover}
-                  className={form.coverUrl === cover ? "active" : ""}
-                  type="button"
-                  onClick={() => setForm({ ...form, coverUrl: cover })}
-                >
-                  <img src={cover} alt={`默认封面 ${index + 1}`} />
-                  <span>{String(index + 1).padStart(2, "0")}</span>
-                </button>
-              ))}
+            <div className="admin-cover-carousel" aria-label="封面图库">
+              <button
+                className="admin-cover-nav"
+                type="button"
+                onClick={() => moveCoverSlide(-1)}
+                aria-label="上一组封面"
+              >
+                ‹
+              </button>
+              <div
+                className="admin-cover-options"
+                ref={coverScrollerRef}
+                onMouseEnter={() => {
+                  coverPausedRef.current = true;
+                }}
+                onMouseLeave={() => {
+                  coverPausedRef.current = false;
+                }}
+              >
+                <div className="admin-cover-track" ref={coverTrackRef}>
+                  {loopedCoverOptions.map(({ cover, loopIndex }, index) => {
+                    const isUploaded = cover.startsWith("/uploads/");
+                    const defaultIndex = coverOptions.indexOf(cover);
+                    return (
+                      <button
+                        key={`${cover}-${loopIndex}`}
+                        className={form.coverUrl === cover ? "active" : ""}
+                        type="button"
+                        onClick={() => setForm({ ...form, coverUrl: cover })}
+                        aria-hidden={loopIndex > 0}
+                        tabIndex={loopIndex > 0 ? -1 : 0}
+                      >
+                        <img src={resolveCover(contentType, cover)} alt={`${isUploaded ? "上传封面" : "默认封面"} ${index + 1}`} />
+                        <span>{isUploaded ? "UP" : String(defaultIndex + 1).padStart(2, "0")}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+              <button
+                className="admin-cover-nav"
+                type="button"
+                onClick={() => moveCoverSlide(1)}
+                aria-label="下一组封面"
+              >
+                ›
+              </button>
             </div>
             <label className="admin-cover-url">
               封面图地址

@@ -3,7 +3,7 @@ import { FileInterceptor } from '@nestjs/platform-express'
 import { Type } from 'class-transformer'
 import { IsArray, IsIn, IsNotEmpty, IsOptional, MaxLength, ValidateNested } from 'class-validator'
 import { randomBytes } from 'node:crypto'
-import { existsSync, mkdirSync, writeFileSync } from 'node:fs'
+import { existsSync, mkdirSync, readdirSync, statSync, writeFileSync } from 'node:fs'
 import { extname, join } from 'node:path'
 import { CommentStatus, ContentStatus, ContentType, Prisma } from '@prisma/client'
 import { PrismaService } from '../../prisma/prisma.module'
@@ -56,6 +56,7 @@ function nowIso() {
 }
 
 const allowedCoverMimeTypes = new Set(['image/png', 'image/jpeg', 'image/webp', 'image/svg+xml'])
+const allowedCoverExtensions = new Set(['.png', '.jpg', '.jpeg', '.webp', '.svg'])
 
 function safeCoverExtension(file: { originalname?: string; mimetype?: string }) {
   const raw = extname(file.originalname ?? '').toLowerCase()
@@ -92,7 +93,7 @@ export class AdminController {
   }
 
   @Post('admin/uploads/cover')
-  @UseInterceptors(FileInterceptor('file', { limits: { fileSize: 5 * 1024 * 1024 } }))
+  @UseInterceptors(FileInterceptor('file', { limits: { fileSize: 20 * 1024 * 1024 } }))
   async uploadCover(
     @Headers('authorization') authorization: string | undefined,
     @UploadedFile() file: any,
@@ -112,6 +113,30 @@ export class AdminController {
     const url = `/uploads/images/${folder}/${filename}`
     await this.adminService.audit(admin.id, 'upload_cover', 'asset', filename, { type, url })
     return { url }
+  }
+
+  @Get('admin/uploads/covers')
+  async listUploadedCovers(
+    @Headers('authorization') authorization: string | undefined,
+    @Query('type') type: ContentType = ContentType.article,
+  ) {
+    await this.adminService.requireAdmin(authorization)
+    if (!['article', 'project'].includes(type)) throw new BadRequestException('type must be article or project')
+
+    const folder = type === ContentType.project ? 'projects' : 'articles'
+    const uploadDir = join(uploadRoot(), 'images', folder)
+    if (!existsSync(uploadDir)) return { urls: [] }
+
+    const urls = readdirSync(uploadDir)
+      .filter((filename) => allowedCoverExtensions.has(extname(filename).toLowerCase()))
+      .map((filename) => {
+        const fullPath = join(uploadDir, filename)
+        return { filename, updatedAt: statSync(fullPath).mtimeMs }
+      })
+      .sort((a, b) => b.updatedAt - a.updatedAt)
+      .map((item) => `/uploads/images/${folder}/${item.filename}`)
+
+    return { urls }
   }
 
   @Post('admin/content')

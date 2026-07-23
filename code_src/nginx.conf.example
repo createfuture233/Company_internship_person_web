@@ -35,6 +35,15 @@ server {
     gzip_min_length 1024;
     gzip_vary on;
 
+    # ========== 上传文件静态服务 ==========
+    # /uploads 开头的请求直接返回静态文件（不经过 Astro）
+    location /uploads/ {
+        alias /var/www/personal-planet/uploads/;
+        expires 30d;
+        add_header Cache-Control "public, immutable";
+        add_header X-Content-Type-Options nosniff;
+    }
+
     # ========== 后端 API 代理 ==========
     # 所有 /api 开头的请求转发给 NestJS 后端（端口 3000）
     location /api/ {

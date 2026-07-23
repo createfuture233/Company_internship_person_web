@@ -25,5 +25,14 @@ export function resolveCover(
   coverUrl?: string | null,
   index = 0,
 ) {
-  return coverUrl?.trim() || getSequentialCover(type, index)
+  const resolved = coverUrl?.trim() || getSequentialCover(type, index)
+
+  if (
+    resolved.startsWith('/uploads/') &&
+    !import.meta.env.PROD
+  ) {
+    return `${import.meta.env.PUBLIC_UPLOAD_BASE ?? 'http://localhost:3000'}${resolved}`
+  }
+
+  return resolved
 }
