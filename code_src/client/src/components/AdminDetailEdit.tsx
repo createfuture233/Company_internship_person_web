@@ -9,6 +9,10 @@ export default function AdminDetailEdit({
   id: string;
 }) {
   const [visible, setVisible] = useState(false);
+  const adminEditHref =
+    type === "article"
+      ? `/admin/articles?id=${encodeURIComponent(id)}`
+      : `/admin/projects?id=${encodeURIComponent(id)}`;
 
   useEffect(() => {
     setVisible(Boolean(localStorage.getItem("personal-planet-admin-token")));
@@ -19,7 +23,7 @@ export default function AdminDetailEdit({
   return (
     <a
       className="admin-detail-edit"
-      href={"/admin?type=" + type + "&id=" + encodeURIComponent(id)}
+      href={adminEditHref}
     >
       <Pencil size={16} /> 进入后台编辑
     </a>
