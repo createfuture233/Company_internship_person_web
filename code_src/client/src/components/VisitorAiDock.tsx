@@ -2,12 +2,13 @@ import { useEffect, useState } from 'react'
 import { Bot, Loader2, Send, X } from 'lucide-react'
 import { apiBase } from '../lib/api'
 import { aiPrompts } from '../lib/aiPrompts'
+import { createClientId } from '../lib/clientId'
 import MarkdownRenderer from "./MarkdownRenderer";
 
 type ChatMessage = { id: string; sender: 'user' | 'assistant'; body: string }
 
 function visitorKey() {
-  const key = localStorage.getItem('personal-planet-visitor-key') || crypto.randomUUID()
+  const key = localStorage.getItem('personal-planet-visitor-key') || createClientId('visitor')
   localStorage.setItem('personal-planet-visitor-key', key)
   return key
 }

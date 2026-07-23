@@ -1,4 +1,5 @@
 import { apiBase } from "../lib/api";
+import { createClientId } from "../lib/clientId";
 import { useEffect, useState } from "react";
 import { Heart, MessageCircle, Send } from "lucide-react";
 
@@ -23,7 +24,7 @@ function visitorKey() {
   const key = "personal-planet-visitor-key";
   const existing = localStorage.getItem(key);
   if (existing) return existing;
-  const created = crypto.randomUUID();
+  const created = createClientId("visitor");
   localStorage.setItem(key, created);
   return created;
 }
