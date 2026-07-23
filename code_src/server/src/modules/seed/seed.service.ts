@@ -32,7 +32,7 @@ const initialContents = [
     id: 'personal-planet',
     type: ContentType.project,
     slug: 'personal-planet',
-    title: '个人星球',
+    title: 'B-612星球',
     summary: '一座记录作品、思考与成长的数字花园。',
     body: '这个项目关注如何把信息、交互与视觉氛围组织成一个连贯的体验，并在持续迭代中保留可维护性。',
     stack: 'Astro · React · NestJS',

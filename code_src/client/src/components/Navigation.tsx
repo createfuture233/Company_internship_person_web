@@ -55,7 +55,7 @@ export default function Navigation() {
   return (
     <nav className="nav">
       <a className="brand" href="/">
-        个人<span>星球</span>
+        B-612<span>星球</span>
       </a>
       <div className={open ? "links open" : "links"}>
         {navLinks.map((link) => (

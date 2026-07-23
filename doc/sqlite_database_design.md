@@ -1,6 +1,6 @@
-# 个人星球 SQLite 数据库设计与建库说明
+# B-612星球 SQLite 数据库设计与建库说明
 
-> 适用项目：个人星球（Astro + React + NestJS）  
+> 适用项目：B-612星球（Astro + React + NestJS）  
 > 建议方案：SQLite + Prisma ORM  
 > 文档日期：2026-07-20
 

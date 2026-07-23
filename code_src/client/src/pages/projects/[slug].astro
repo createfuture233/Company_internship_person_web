@@ -29,7 +29,7 @@ const project = (await response.json()) as {
 const cover = resolveCover("project", project.coverUrl);
 ---
 
-<BaseLayout title={`${project.title}｜个人星球`}>
+<BaseLayout title={`${project.title}｜B-612星球`}>
   <article class="detail-page" data-content-type="project" data-content-id={project.id}>
     <a class="back-link" href="/projects">← 返回作品列表</a>
     <img class="detail-cover" src={cover} alt={`${project.title} 封面图`} />

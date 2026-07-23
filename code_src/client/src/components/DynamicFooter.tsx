@@ -62,7 +62,7 @@ export default function DynamicFooter() {
       <div className="footer-grid">
         <div className="footer-brand">
           <div className="footer-mark">✦</div>
-          <strong>个人星球</strong>
+          <strong>B-612星球</strong>
           <p>
             记录思考、作品与成长。在代码和想象之间，缓慢构建属于自己的数字宇宙。
           </p>
@@ -81,7 +81,7 @@ export default function DynamicFooter() {
         </div>
       </div>
       <div className="footer-bottom">
-        <p>© 2026 PERSONAL PLANET · ALL SIGNALS OPEN</p>
+        <p>© 2026 B-612 PLANET · ALL SIGNALS OPEN</p>
         <div>
           <span>保持连接</span>
           {settings && (

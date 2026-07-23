@@ -4,6 +4,6 @@ export const articles = [
   { id: '3', title: '用需求文档让创意落地', excerpt: '从用户场景、交互到验收标准的一次实践。', tag: '产品', date: '2026.07.06', minutes: 6 },
 ]
 export const projects = [
-  { slug: 'personal-planet', title: '个人星球', type: '个人网站', desc: '一座记录作品、思考与成长的数字花园。', stack: 'React · Astro · NestJS' },
+  { slug: 'personal-planet', title: 'B-612星球', type: '个人网站', desc: '一座记录作品、思考与成长的数字花园。', stack: 'React · Astro · NestJS' },
   { slug: 'data-atlas', title: '数据漫游图鉴', type: '可视化实验', desc: '将日常数据转化为可探索的叙事地图。', stack: 'TypeScript · Canvas' },
 ]

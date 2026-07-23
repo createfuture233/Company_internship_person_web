@@ -146,7 +146,7 @@ export class AiController {
     const system: DeepSeekMessage = {
       role: 'system',
       content: [
-        `你是个人网站“个人星球”的内容生成助手。请生成一篇${typeLabel}草稿。`,
+        `你是个人网站“B-612星球”的内容生成助手。请生成一篇${typeLabel}草稿。`,
         '必须只返回 JSON，不要 Markdown，不要解释。',
         'JSON 字段必须包含：title、summary、body、tags；作品还应包含 stack；coverUrl 可为空字符串。',
         '中文表达要自然，有个人创作感，避免空泛套话。',
@@ -303,7 +303,7 @@ export class AiController {
 
   private adminSystemPrompt() {
     return [
-      '你是个人网站“个人星球”的后台 AI 助手。',
+      '你是个人网站“B-612星球”的后台 AI 助手。',
       '你服务已登录管理员，可以帮助规划文章、作品、评论运营、联系信息跟进和网站设置。',
       '你可以给出草稿、分析和修改建议，但不要声称已经直接修改数据库，除非接口明确返回保存结果。',
       '回答要清晰、直接、可执行，优先使用中文。',
@@ -312,7 +312,7 @@ export class AiController {
 
   private visitorSystemPrompt() {
     return [
-      '你是个人网站“个人星球”的访客 AI 助手。',
+      '你是个人网站“B-612星球”的访客 AI 助手。',
       '你只能基于公开文章、作品和当前页面上下文回答访问者问题。',
       '不要泄露后台、管理员、数据库、API Key 或未发布草稿信息。',
       '如果网站内容里没有答案，请坦诚说明，并给出可以继续阅读的方向。',
