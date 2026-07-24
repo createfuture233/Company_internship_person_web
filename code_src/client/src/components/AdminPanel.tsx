@@ -244,7 +244,7 @@ export default function AdminPanel({
 
     let frame = 0;
     let lastTime = performance.now();
-    const speed = 22;
+    const speed = 100;
 
     const tick = (time: number) => {
       const delta = Math.min(48, time - lastTime);
