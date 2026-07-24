@@ -3,23 +3,32 @@ import { createClientId } from "../lib/clientId";
 import { useEffect, useState } from "react";
 import { Heart, MessageCircle, Send } from "lucide-react";
 
+/** 内容类型：文章或项目 */
 type ContentType = "article" | "project";
+/** 评论排序方式：最新或点赞最多 */
 type CommentSort = "latest" | "likes";
 
+/** 评论项数据结构 */
 type CommentItem = {
-  id: string;
-  name: string;
-  avatar: string;
-  content: string;
-  likes: number;
-  createdAt: string;
+  id: string;           // 评论ID
+  name: string;         // 评论者昵称
+  avatar: string;       // 头像标识
+  content: string;      // 评论内容
+  likes: number;        // 点赞数
+  createdAt: string;    // 创建时间
 };
 
+/** 评论组件属性 */
 type CommentsProps = {
-  contentType: ContentType;
-  contentId: string;
+  contentType: ContentType;  // 内容类型
+  contentId: string;         // 内容ID
 };
 
+/**
+ * 获取访客标识（用于点赞去重）
+ * 如果本地不存在则创建新标识
+ * @returns 访客唯一标识
+ */
 function visitorKey() {
   const key = "personal-planet-visitor-key";
   const existing = localStorage.getItem(key);
@@ -29,6 +38,11 @@ function visitorKey() {
   return created;
 }
 
+/**
+ * 格式化日期时间为中文显示格式
+ * @param value - ISO日期字符串
+ * @returns 格式化后的日期时间字符串
+ */
 function formatDate(value: string) {
   return new Intl.DateTimeFormat("zh-CN", {
     dateStyle: "medium",
@@ -36,16 +50,29 @@ function formatDate(value: string) {
   }).format(new Date(value));
 }
 
+/**
+ * 评论组件
+ * 用于展示和管理文章/作品的评论功能
+ * @param contentType - 内容类型（文章或项目）
+ * @param contentId - 内容ID
+ */
 export default function Comments({ contentType, contentId }: CommentsProps) {
-  const [sort, setSort] = useState<CommentSort>("latest");
-  const [comments, setComments] = useState<CommentItem[]>([]);
-  const [name, setName] = useState("");
-  const [content, setContent] = useState("");
-  const [loading, setLoading] = useState(true);
-  const [sending, setSending] = useState(false);
-  const [message, setMessage] = useState("");
-  const [likedIds, setLikedIds] = useState<Set<string>>(() => new Set());
+  // ========== 状态管理 ==========
+  const [sort, setSort] = useState<CommentSort>("latest");     // 排序方式
+  const [comments, setComments] = useState<CommentItem[]>([]); // 评论列表
+  const [name, setName] = useState("");                        // 评论者昵称
+  const [content, setContent] = useState("");                  // 评论内容
+  const [loading, setLoading] = useState(true);                // 加载状态
+  const [sending, setSending] = useState(false);               // 发送状态
+  const [message, setMessage] = useState("");                  // 提示消息
+  const [likedIds, setLikedIds] = useState<Set<string>>(() => new Set()); // 已点赞的评论ID
 
+  // ========== 生命周期钩子 ==========
+
+  /**
+   * 加载评论列表
+   * 使用 AbortController 处理取消请求
+   */
   useEffect(() => {
     const controller = new AbortController();
 
@@ -70,11 +97,19 @@ export default function Comments({ contentType, contentId }: CommentsProps) {
     }
 
     void loadComments();
-    return () => controller.abort();
+    return () => controller.abort(); // 组件卸载时取消请求
   }, [contentId, contentType, sort]);
 
+  // ========== 核心方法 ==========
+
+  /**
+   * 提交评论
+   * @param event - 表单提交事件
+   */
   async function submitComment(event: { preventDefault: () => void }) {
     event.preventDefault();
+    
+    // 验证输入
     if (!name.trim() || !content.trim()) {
       setMessage("请填写昵称和评论内容。");
       return;
@@ -82,19 +117,26 @@ export default function Comments({ contentType, contentId }: CommentsProps) {
 
     setSending(true);
     setMessage("");
+
     try {
       const response = await fetch(apiBase + "/comments", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ contentType, contentId, name, content }),
       });
+
       if (!response.ok) throw new Error("submit failed");
+      
       const created = (await response.json()) as CommentItem;
+      
+      // 根据排序方式插入新评论
       setComments((current) =>
         sort === "latest"
           ? [created, ...current]
           : [...current, created].sort((a, b) => b.likes - a.likes),
       );
+      
+      // 重置表单
       setName("");
       setContent("");
       setMessage("评论已发布。");
@@ -105,16 +147,25 @@ export default function Comments({ contentType, contentId }: CommentsProps) {
     }
   }
 
+  /**
+   * 点赞评论
+   * @param id - 评论ID
+   */
   async function likeComment(id: string) {
+    // 防止重复点赞
     if (likedIds.has(id)) return;
 
     try {
       const response = await fetch(apiBase + "/comments/" + id + "/like", {
         method: "POST",
-        headers: { "X-Visitor-Key": visitorKey() },
+        headers: { "X-Visitor-Key": visitorKey() }, // 携带访客标识
       });
+
       if (!response.ok) throw new Error("like failed");
+      
       const updated = (await response.json()) as CommentItem;
+      
+      // 更新评论列表中的点赞数
       setComments((current) =>
         current
           .map((item) =>
@@ -122,6 +173,8 @@ export default function Comments({ contentType, contentId }: CommentsProps) {
           )
           .sort((a, b) => (sort === "likes" ? b.likes - a.likes : 0)),
       );
+      
+      // 记录已点赞的评论
       setLikedIds((current) => new Set([...current, id]));
     } catch {
       setMessage("点赞失败，请稍后再试。");

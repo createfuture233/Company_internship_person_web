@@ -1,8 +1,13 @@
+/**
+ * 数据种子服务
+ * 在模块初始化时自动创建初始数据（管理员账户、示例文章、作品和评论）
+ */
 import { Injectable, OnModuleInit } from '@nestjs/common'
 import { CommentStatus, ContentStatus, ContentType } from '@prisma/client'
 import * as bcrypt from 'bcrypt'
 import { PrismaService } from '../../prisma/prisma.module'
 
+/** 初始内容数据 */
 const initialContents = [
   {
     id: '1',
@@ -52,8 +57,14 @@ const initialContents = [
 export class SeedService implements OnModuleInit {
   constructor(private readonly prisma: PrismaService) {}
 
+  /**
+   * 模块初始化时执行数据播种
+   * 创建管理员账户和示例数据
+   */
   async onModuleInit() {
     const now = new Date().toISOString()
+    
+    // 创建/更新管理员账户（默认密码：123456）
     const passwordHash = await bcrypt.hash(process.env.ADMIN_INITIAL_PASSWORD ?? '123456', 12)
     await this.prisma.admin.upsert({
       where: { username: 'admin' },
@@ -61,6 +72,7 @@ export class SeedService implements OnModuleInit {
       create: { username: 'admin', passwordHash, role: 'admin', createdAt: now, updatedAt: now },
     })
 
+    // 创建/更新示例内容
     for (const item of initialContents) {
       await this.prisma.content.upsert({
         where: { id: item.id },
@@ -69,6 +81,7 @@ export class SeedService implements OnModuleInit {
       })
     }
 
+    // 创建/更新示例评论
     const commentSeeds = [
       { id: 'comment-article-1', contentId: '1', nickname: 'Nova', avatarText: 'N', body: '把个人网站做成长期记录的想法很有启发。', likes: 12 },
       { id: 'comment-article-1-2', contentId: '1', nickname: 'Mika', avatarText: 'M', body: '期待下一篇开发日志。', likes: 5 },

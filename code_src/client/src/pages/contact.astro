@@ -1,13 +1,21 @@
 ---
-import BaseLayout from '../layouts/BaseLayout.astro'
-import ContactForm from '../components/ContactForm'
+/**
+ * 联系页面
+ * 提供联系方式展示和联系表单
+ */
+import BaseLayout from '../layouts/BaseLayout.astro'    // 基础布局
+import ContactForm from '../components/ContactForm'      // 联系表单组件
 
+// API配置
 const apiBase = import.meta.env.PUBLIC_API_BASE ?? 'http://localhost:3000/api'
+
+// 默认设置（当后端不可用时使用）
 const fallbackSettings = {
   contact_email: 'hello@example.com',
   github_url: 'https://github.com',
 }
 
+// 站点设置（SSR期间获取）
 let settings = fallbackSettings
 
 try {
@@ -23,6 +31,7 @@ try {
   settings = fallbackSettings
 }
 
+// 格式化邮箱链接
 const emailHref = settings.contact_email.startsWith('mailto:')
   ? settings.contact_email
   : `mailto:${settings.contact_email}`

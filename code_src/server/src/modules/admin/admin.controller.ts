@@ -1,3 +1,7 @@
+/**
+ * 管理员控制器
+ * 提供后台管理的REST API接口，包括内容管理、评论管理、消息管理、设置管理等功能
+ */
 import { BadRequestException, Body, Controller, Delete, Get, Headers, NotFoundException, Param, Patch, Post, Query, UploadedFile, UseInterceptors } from '@nestjs/common'
 import { FileInterceptor } from '@nestjs/platform-express'
 import { Type } from 'class-transformer'
@@ -9,55 +13,80 @@ import { CommentStatus, ContentStatus, ContentType, Prisma } from '@prisma/clien
 import { PrismaService } from '../../prisma/prisma.module'
 import { AdminService } from './admin.service'
 
+/** 评论排序类型 */
 type CommentSort = 'latest' | 'likes'
 
+/** 内容字段DTO基类 */
 class ContentFieldsDto {
-  @IsNotEmpty() @MaxLength(120) title!: string
-  @IsNotEmpty() @MaxLength(500) summary!: string
-  @IsNotEmpty() @MaxLength(5000) body!: string
-  @IsOptional() @MaxLength(2000) coverUrl?: string
-  @IsOptional() @MaxLength(500) stack?: string
-  @IsIn(['draft', 'published', 'archived']) status!: ContentStatus
-  @IsArray() @IsOptional() @MaxLength(30, { each: true }) tags?: string[]
+  @IsNotEmpty() @MaxLength(120) title!: string          // 标题，最大120字符
+  @IsNotEmpty() @MaxLength(500) summary!: string        // 摘要，最大500字符
+  @IsNotEmpty() @MaxLength(5000) body!: string          // 正文，最大5000字符
+  @IsOptional() @MaxLength(2000) coverUrl?: string      // 封面图片URL
+  @IsOptional() @MaxLength(500) stack?: string          // 技术栈（仅项目使用）
+  @IsIn(['draft', 'published', 'archived']) status!: ContentStatus  // 状态
+  @IsArray() @IsOptional() @MaxLength(30, { each: true }) tags?: string[]  // 标签列表
 }
 
+/** 创建内容DTO */
 class CreateContentDto extends ContentFieldsDto {
-  @IsIn(['article', 'project']) type!: ContentType
+  @IsIn(['article', 'project']) type!: ContentType       // 内容类型（文章/项目）
 }
 
+/** 更新内容DTO */
 class UpdateContentDto extends ContentFieldsDto {}
 
+/** 更新评论状态DTO */
 class UpdateCommentStatusDto {
-  @IsIn(['visible', 'hidden', 'spam']) status!: CommentStatus
+  @IsIn(['visible', 'hidden', 'spam']) status!: CommentStatus  // 评论状态
 }
 
+/** 更新消息状态DTO */
 class UpdateMessageStatusDto {
-  @IsIn(['unread', 'read', 'replied', 'archived']) status!: string
+  @IsIn(['unread', 'read', 'replied', 'archived']) status!: string  // 消息状态
 }
 
+/** 设置项DTO */
 class SettingItemDto {
-  @IsNotEmpty() @MaxLength(100) key!: string
-  @MaxLength(5000) value!: string
+  @IsNotEmpty() @MaxLength(100) key!: string             // 设置键名
+  @MaxLength(5000) value!: string                        // 设置值
 }
 
+/** 更新设置DTO */
 class UpdateSettingsDto {
   @IsArray()
   @ValidateNested({ each: true })
   @Type(() => SettingItemDto)
-  settings!: SettingItemDto[]
+  settings!: SettingItemDto[]                            // 设置项数组
 }
 
+/**
+ * 生成唯一slug
+ * @param type - 内容类型
+ * @returns slug字符串
+ */
 function newSlug(type: ContentType) {
   return type + '-' + Date.now() + '-' + randomBytes(3).toString('hex')
 }
 
+/**
+ * 获取当前时间的ISO字符串
+ * @returns ISO格式时间字符串
+ */
 function nowIso() {
   return new Date().toISOString()
 }
 
+/** 允许的封面图片MIME类型 */
 const allowedCoverMimeTypes = new Set(['image/png', 'image/jpeg', 'image/webp', 'image/svg+xml'])
+
+/** 允许的封面图片扩展名 */
 const allowedCoverExtensions = new Set(['.png', '.jpg', '.jpeg', '.webp', '.svg'])
 
+/**
+ * 安全获取文件扩展名
+ * @param file - 文件对象
+ * @returns 安全的扩展名
+ */
 function safeCoverExtension(file: { originalname?: string; mimetype?: string }) {
   const raw = extname(file.originalname ?? '').toLowerCase()
   if (['.png', '.jpg', '.jpeg', '.webp', '.svg'].includes(raw)) return raw
@@ -68,6 +97,10 @@ function safeCoverExtension(file: { originalname?: string; mimetype?: string }) 
   return '.png'
 }
 
+/**
+ * 获取上传目录根路径
+ * @returns 上传目录路径
+ */
 function uploadRoot() {
   const envUploadRoot = process.env.UPLOAD_ROOT?.trim()
   if (envUploadRoot) return envUploadRoot

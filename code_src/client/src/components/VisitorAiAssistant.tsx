@@ -4,8 +4,14 @@ import { apiBase } from '../lib/api'
 import { createClientId } from '../lib/clientId'
 import MarkdownRenderer from "./MarkdownRenderer";
 
+/** 聊天消息数据结构 */
 type ChatMessage = { id: string; sender: 'user' | 'assistant'; body: string }
 
+/**
+ * 获取访客标识（用于追踪会话）
+ * 如果本地不存在则创建新标识
+ * @returns 访客唯一标识
+ */
 function visitorKey() {
   const key = localStorage.getItem('personal-planet-visitor-key') || createClientId('visitor')
   localStorage.setItem('personal-planet-visitor-key', key)

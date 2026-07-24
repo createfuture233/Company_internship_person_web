@@ -1,8 +1,16 @@
 ---
-import '../styles/global.css'
-import Navigation from '../components/Navigation'
-import Footer from '../components/DynamicFooter'
-import VisitorAiDock from '../components/VisitorAiDock'
+/**
+ * 基础布局组件
+ * 提供网站的通用结构，包括导航、页脚、主题切换和交互效果
+ */
+import '../styles/global.css'                    // 全局样式
+import Navigation from '../components/Navigation'    // 导航组件
+import Footer from '../components/DynamicFooter'    // 动态页脚组件
+import VisitorAiDock from '../components/VisitorAiDock' // 访客AI助手
+
+// 组件属性
+// @param title - 页面标题（默认：B-612星球）
+// @param description - 页面描述（默认：B-612星球：记录作品、思考与成长。）
 const { title = 'B-612星球', description = 'B-612星球：记录作品、思考与成长。' } = Astro.props
 ---
 <!doctype html>

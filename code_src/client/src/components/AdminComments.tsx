@@ -3,17 +3,28 @@ import { Eye, EyeOff, Heart, Trash2 } from "lucide-react";
 import { apiBase } from "../lib/api";
 import Pagination from "./Pagination";
 
+/** 内容类型 */
 type ContentType = "article" | "project";
+
+/** 评论项数据结构 */
 type Item = {
-  id: string;
-  nickname: string;
-  body: string;
-  likes: number;
-  status: "visible" | "hidden" | "spam";
-  createdAt: string;
-  content: { title: string; type: ContentType };
+  id: string;                              // 评论ID
+  nickname: string;                        // 评论者昵称
+  body: string;                            // 评论内容
+  likes: number;                           // 点赞数
+  status: "visible" | "hidden" | "spam";   // 状态（显示/隐藏/垃圾）
+  createdAt: string;                       // 创建时间
+  content: { title: string; type: ContentType }; // 所属内容
 };
+
+/** 内容选项数据结构 */
 type ContentOption = { id: string; title: string; type: ContentType };
+
+/**
+ * 格式化日期时间为中文显示格式
+ * @param value - ISO日期字符串
+ * @returns 格式化后的日期时间字符串
+ */
 const format = (value: string) =>
   new Intl.DateTimeFormat("zh-CN", {
     dateStyle: "medium",

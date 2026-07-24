@@ -1,31 +1,42 @@
 ---
+/**
+ * 作品详情页面
+ * 根据作品slug展示单个作品的详细内容
+ * @note 禁用预渲染，因为需要动态获取作品内容
+ */
 export const prerender = false;
 
-import BaseLayout from "../../layouts/BaseLayout.astro";
-import Comments from "../../components/Comments";
-import AdminDetailEdit from "../../components/AdminDetailEdit";
-import MarkdownRenderer from "../../components/MarkdownRenderer";
-import { apiBase } from "../../lib/api";
-import { resolveCover } from "../../lib/defaultCovers";
+import BaseLayout from "../../layouts/BaseLayout.astro";      // 基础布局
+import Comments from "../../components/Comments";              // 评论组件
+import AdminDetailEdit from "../../components/AdminDetailEdit"; // 管理员编辑入口
+import MarkdownRenderer from "../../components/MarkdownRenderer"; // Markdown渲染器
+import { apiBase } from "../../lib/api";                        // API配置
+import { resolveCover } from "../../lib/defaultCovers";        // 封面解析工具
 
+// 获取URL参数中的作品slug
 const { slug } = Astro.params;
+
+// SSR期间获取作品数据
 const response = slug
   ? await fetch(`${apiBase}/content/project/${encodeURIComponent(slug)}`)
   : null;
 
+// 如果作品不存在或获取失败，重定向到作品列表
 if (!response?.ok) return Astro.redirect("/projects");
 
+// 解析作品数据
 const project = (await response.json()) as {
-  id: string;
-  slug: string;
-  title: string;
-  summary: string;
-  body: string;
-  coverUrl: string | null;
-  stack: string | null;
-  tags: Array<{ name: string }>;
+  id: string;                     // 作品ID
+  slug: string;                   // 短链接
+  title: string;                  // 标题
+  summary: string;                // 摘要
+  body: string;                   // 正文（Markdown格式）
+  coverUrl: string | null;        // 封面图片URL
+  stack: string | null;           // 技术栈
+  tags: Array<{ name: string }>;  // 标签列表
 };
 
+// 解析封面图片
 const cover = resolveCover("project", project.coverUrl);
 ---
 

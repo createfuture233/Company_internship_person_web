@@ -3,15 +3,17 @@ import { Trash2 } from "lucide-react";
 import { apiBase } from "../lib/api";
 import Pagination from "./Pagination";
 
+/** 联系信息项数据结构 */
 type Item = {
-  id: number;
-  name: string;
-  email: string;
-  message: string;
-  status: string;
-  createdAt: string;
+  id: number;       // 消息ID
+  name: string;     // 发送者姓名
+  email: string;    // 发送者邮箱
+  message: string;  // 消息内容
+  status: string;   // 状态（unread/read/replied/archived）
+  createdAt: string; // 创建时间
 };
 
+/** 状态中文映射 */
 const statusText: Record<string, string> = {
   unread: "未读",
   read: "已读",
@@ -19,6 +21,11 @@ const statusText: Record<string, string> = {
   archived: "已归档",
 };
 
+/**
+ * 格式化日期时间为中文显示格式
+ * @param value - ISO日期字符串
+ * @returns 格式化后的日期时间字符串
+ */
 const format = (value: string) =>
   new Intl.DateTimeFormat("zh-CN", {
     dateStyle: "medium",

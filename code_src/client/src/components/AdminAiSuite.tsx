@@ -4,23 +4,45 @@ import { apiBase } from '../lib/api'
 import { aiPrompts } from '../lib/aiPrompts'
 import MarkdownRenderer from "./MarkdownRenderer";
 
+/** 内容类型：文章或项目 */
 type ContentType = 'article' | 'project'
+/** 内容项基本信息 */
 type ContentItem = { id: string; type: ContentType; title: string; summary?: string; body?: string; status?: string }
+/** AI 配置信息 */
 type AiConfig = { configured: boolean; model: string; maxContextChars: number; visitorRateLimit: number; adminRateLimit: number }
+/** 聊天消息类型 */
 type ChatMessage = { id: string; sender: 'user' | 'assistant'; body: string }
+/** 上传文件信息 */
 type UploadedFile = { id: string; originalName: string; fileSize: number; parsedText: string }
+/** 生成的草稿数据 */
 type Draft = { title: string; summary: string; body: string; stack?: string | null; coverUrl?: string | null; tags: string[] }
+/** AI 生成结果 */
 type GenerationResult = { generation: { id: string }; draft: Draft }
+/** 忙碌状态键值 */
 type BusyKey = '' | 'chat' | 'upload' | 'file-analysis' | 'generate' | 'analyze' | 'save-draft' | 'save-published'
 
+/**
+ * 获取管理员登录令牌
+ * @returns JWT token 字符串
+ */
 function token() {
   return localStorage.getItem('personal-planet-admin-token') ?? ''
 }
 
+/**
+ * 获取认证请求头
+ * @returns 包含 Authorization 的请求头对象
+ */
 function authHeaders() {
   return { Authorization: `Bearer ${token()}` }
 }
 
+/**
+ * 发送 JSON 请求并处理响应
+ * @param path - API 路径
+ * @param init - 请求配置
+ * @returns 解析后的 JSON 数据
+ */
 async function requestJson<T>(path: string, init: RequestInit = {}) {
   const response = await fetch(apiBase + path, init)
   const data = await response.json().catch(() => ({}))
@@ -28,6 +50,11 @@ async function requestJson<T>(path: string, init: RequestInit = {}) {
   return data as T
 }
 
+/**
+ * 读取文本文件内容
+ * @param file - 文件对象
+ * @returns 文件内容字符串
+ */
 function readTextFile(file: File) {
   return new Promise<string>((resolve, reject) => {
     const reader = new FileReader()
@@ -37,32 +64,57 @@ function readTextFile(file: File) {
   })
 }
 
+/**
+ * 加载状态组件
+ * @param label - 加载提示文字
+ */
 function LoadingLine({ label }: { label: string }) {
   return <div className="admin-ai-loading"><Loader2 className="admin-ai-spin" size={18} /><span>{label}</span><i /></div>
 }
 
+/**
+ * AI 助手套件组件（V3版本）
+ * 集成后台问答、文件解析、内容生成、内容分析四大功能模块
+ */
 export default function AdminAiSuiteV3() {
-  const [config, setConfig] = useState<AiConfig | null>(null)
-  const [contents, setContents] = useState<ContentItem[]>([])
-  const [active, setActive] = useState<'chat' | 'upload' | 'generate' | 'analyze'>('chat')
-  const [notice, setNotice] = useState('')
-  const [busy, setBusy] = useState<BusyKey>('')
-  const [messages, setMessages] = useState<ChatMessage[]>([])
-  const [conversationId, setConversationId] = useState('')
-  const [chatInput, setChatInput] = useState('')
-  const bottomRef = useRef<HTMLDivElement | null>(null)
-  const [uploaded, setUploaded] = useState<UploadedFile | null>(null)
-  const [selectedFileName, setSelectedFileName] = useState('')
-  const [fileAnalysis, setFileAnalysis] = useState('')
-  const [generateType, setGenerateType] = useState<ContentType>('article')
-  const [generatePrompt, setGeneratePrompt] = useState(aiPrompts.admin.defaultGenerate)
-  const [sourceContentId, setSourceContentId] = useState('')
-  const [generation, setGeneration] = useState<GenerationResult | null>(null)
-  const [savedGenerationId, setSavedGenerationId] = useState('')
-  const [analysisContentId, setAnalysisContentId] = useState('')
-  const [analysisPrompt, setAnalysisPrompt] = useState(aiPrompts.admin.defaultAnalyze)
-  const [analysis, setAnalysis] = useState('')
+  // ========== 基础状态 ==========
+  const [config, setConfig] = useState<AiConfig | null>(null)            // AI 配置信息
+  const [contents, setContents] = useState<ContentItem[]>([])            // 内容列表
+  const [active, setActive] = useState<'chat' | 'upload' | 'generate' | 'analyze'>('chat') // 当前激活的标签页
+  const [notice, setNotice] = useState('')                               // 通知消息
+  const [busy, setBusy] = useState<BusyKey>('')                          // 忙碌状态
 
+  // ========== 聊天模块状态 ==========
+  const [messages, setMessages] = useState<ChatMessage[]>([])            // 聊天消息列表
+  const [conversationId, setConversationId] = useState('')               // 当前会话 ID
+  const [chatInput, setChatInput] = useState('')                         // 聊天输入框内容
+  const bottomRef = useRef<HTMLDivElement | null>(null)                  // 消息列表底部引用
+
+  // ========== 文件解析模块状态 ==========
+  const [uploaded, setUploaded] = useState<UploadedFile | null>(null)    // 已上传的文件
+  const [selectedFileName, setSelectedFileName] = useState('')           // 选中的文件名
+  const [fileAnalysis, setFileAnalysis] = useState('')                   // 文件分析结果
+
+  // ========== 内容生成模块状态 ==========
+  const [generateType, setGenerateType] = useState<ContentType>('article') // 生成类型
+  const [generatePrompt, setGeneratePrompt] = useState(aiPrompts.admin.defaultGenerate) // 生成提示词
+  const [sourceContentId, setSourceContentId] = useState('')             // 参考内容 ID
+  const [generation, setGeneration] = useState<GenerationResult | null>(null) // 生成结果
+  const [savedGenerationId, setSavedGenerationId] = useState('')         // 已保存的生成结果 ID
+
+  // ========== 内容分析模块状态 ==========
+  const [analysisContentId, setAnalysisContentId] = useState('')         // 待分析内容 ID
+  const [analysisPrompt, setAnalysisPrompt] = useState(aiPrompts.admin.defaultAnalyze) // 分析提示词
+  const [analysis, setAnalysis] = useState('')                           // 分析结果
+
+  // ========== 生命周期钩子 ==========
+
+  /**
+   * 组件挂载时初始化数据
+   * 1. 获取 AI 配置
+   * 2. 获取内容列表
+   * 3. 默认选中第一个内容进行分析
+   */
   useEffect(() => {
     Promise.all([
       requestJson<AiConfig>('/admin/ai/config', { headers: authHeaders() }),
@@ -74,24 +126,38 @@ export default function AdminAiSuiteV3() {
     }).catch((error) => setNotice(error.message || '无法读取后台 AI 数据，请重新登录。'))
   }, [])
 
+  /**
+   * 消息更新时自动滚动到底部
+   */
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' })
   }, [messages, busy])
 
+  // ========== 聊天模块方法 ==========
+
+  /**
+   * 提交聊天消息
+   * @param event - 表单提交事件
+   */
   async function submitChat(event: { preventDefault: () => void }) {
     event.preventDefault()
     const message = chatInput.trim()
     if (!message || busy) return
+
+    // 立即显示用户消息
     setMessages((current) => [...current, { id: `local-${Date.now()}`, sender: 'user', body: message }])
     setChatInput('')
     setNotice('')
     setBusy('chat')
+
     try {
+      // 发送请求到后端
       const data = await requestJson<{ conversationId: string; message: { id: string; body: string } }>('/admin/ai/chat', {
         method: 'POST',
         headers: { ...authHeaders(), 'Content-Type': 'application/json' },
         body: JSON.stringify({ message, conversationId: conversationId || undefined }),
       })
+      // 更新会话 ID 和消息列表
       setConversationId(data.conversationId)
       setMessages((current) => [...current, { id: data.message.id, sender: 'assistant', body: data.message.body }])
     } catch (error) {
@@ -101,6 +167,12 @@ export default function AdminAiSuiteV3() {
     }
   }
 
+  // ========== 文件解析模块方法 ==========
+
+  /**
+   * 分析已上传的文件
+   * @param fileId - 文件 ID
+   */
   async function analyzeFile(fileId: string) {
     setBusy('file-analysis')
     setFileAnalysis('')
@@ -118,8 +190,14 @@ export default function AdminAiSuiteV3() {
     }
   }
 
+  /**
+   * 上传并解析文件
+   * @param file - 文件对象
+   */
   async function uploadFile(file?: File) {
     if (!file || busy) return
+
+    // 重置相关状态
     setNotice('')
     setUploaded(null)
     setFileAnalysis('')
@@ -127,8 +205,11 @@ export default function AdminAiSuiteV3() {
     setSavedGenerationId('')
     setSelectedFileName(file.name)
     setBusy('upload')
+
     try {
+      // 读取文件内容
       const text = await readTextFile(file)
+      // 上传到后端
       const data = await requestJson<UploadedFile>('/admin/ai/files', {
         method: 'POST',
         headers: { ...authHeaders(), 'Content-Type': 'application/json' },
@@ -136,6 +217,7 @@ export default function AdminAiSuiteV3() {
       })
       setUploaded(data)
       setNotice(`已解析文件：${data.originalName}，正在生成 AI 分析...`)
+      // 自动进行文件分析
       await analyzeFile(data.id)
     } catch (error) {
       setBusy('')
@@ -143,22 +225,37 @@ export default function AdminAiSuiteV3() {
     }
   }
 
+  // ========== 内容生成模块方法 ==========
+
+  /**
+   * 生成内容草稿
+   * @param type - 生成类型（文章或项目）
+   * @param prompt - 生成提示词
+   */
   async function generateDraft(type = generateType, prompt = generatePrompt) {
     if (busy || !prompt.trim()) return
+
+    // 重置相关状态
     setNotice('')
     setGeneration(null)
     setSavedGenerationId('')
     setGenerateType(type)
     setBusy('generate')
+
     try {
       const data = await requestJson<GenerationResult>('/admin/ai/generate', {
         method: 'POST',
         headers: { ...authHeaders(), 'Content-Type': 'application/json' },
-        body: JSON.stringify({ generationType: type, prompt, fileId: uploaded?.id, sourceContentId: sourceContentId || undefined }),
+        body: JSON.stringify({ 
+          generationType: type, 
+          prompt, 
+          fileId: uploaded?.id,           // 可选：参考已上传文件
+          sourceContentId: sourceContentId || undefined, // 可选：参考现有内容
+        }),
       })
       setGeneration(data)
       setNotice('AI 草稿已生成，可以检查后保存到内容库。')
-      setActive('generate')
+      setActive('generate') // 自动切换到生成标签页
     } catch (error) {
       setNotice(error instanceof Error ? error.message : '生成失败。')
     } finally {
@@ -166,19 +263,32 @@ export default function AdminAiSuiteV3() {
     }
   }
 
+  /**
+   * 保存生成的草稿
+   * @param status - 保存状态（草稿或发布）
+   */
   async function saveDraft(status: 'draft' | 'published') {
     if (!generation || savedGenerationId || busy) return
+
     const label = status === 'published' ? '直接发布' : '保存为草稿'
+    // 确认保存操作
     if (!window.confirm(`确定要${label}《${generation.draft.title}》吗？`)) return
+
     setBusy(status === 'published' ? 'save-published' : 'save-draft')
+
     try {
-      const data = await requestJson<{ content: { id: string; type: ContentType; slug: string; title: string } }>(`/admin/ai/generations/${generation.generation.id}/save`, {
-        method: 'POST',
-        headers: { ...authHeaders(), 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status }),
-      })
+      const data = await requestJson<{ content: { id: string; type: ContentType; slug: string; title: string } }>(
+        `/admin/ai/generations/${generation.generation.id}/save`, 
+        {
+          method: 'POST',
+          headers: { ...authHeaders(), 'Content-Type': 'application/json' },
+          body: JSON.stringify({ status }),
+        }
+      )
+      // 标记为已保存，避免重复保存
       setSavedGenerationId(generation.generation.id)
       setNotice(`已${label}：${data.content.title}`)
+      // 更新内容列表
       setContents((current) => [{ id: data.content.id, type: data.content.type, title: data.content.title, status }, ...current])
       window.alert(`保存成功：${data.content.title}`)
     } catch (error) {
@@ -188,11 +298,18 @@ export default function AdminAiSuiteV3() {
     }
   }
 
+  // ========== 内容分析模块方法 ==========
+
+  /**
+   * 分析选中的内容
+   */
   async function analyze() {
     if (!analysisContentId || busy) return
+
     setNotice('')
     setAnalysis('')
     setBusy('analyze')
+
     try {
       const data = await requestJson<{ answer: string }>('/admin/ai/analyze', {
         method: 'POST',

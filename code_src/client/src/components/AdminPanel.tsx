@@ -17,33 +17,45 @@ import { getCoverOptions, resolveCover } from "../lib/defaultCovers";
 import MarkdownRenderer from "./MarkdownRenderer";
 import Pagination from "./Pagination";
 
+/** 内容类型：文章或项目 */
 type ContentType = "article" | "project";
+/** 内容状态：草稿、已发布、已归档 */
 type ContentStatus = "draft" | "published" | "archived";
+/** 标签类型定义 */
 type ContentTag = { id: number; name: string };
+/** 内容项完整数据结构 */
 type ContentItem = {
-  id: string;
-  type: ContentType;
-  slug: string;
-  title: string;
-  summary: string;
-  body: string;
-  coverUrl: string | null;
-  stack: string | null;
-  status: ContentStatus;
-  publishedAt?: string | null;
-  createdAt?: string;
-  updatedAt?: string;
-  tags: ContentTag[];
+  id: string;                     // 内容唯一标识
+  type: ContentType;              // 内容类型
+  slug: string;                   // URL友好的别名
+  title: string;                  // 标题
+  summary: string;                // 摘要
+  body: string;                   // 正文内容（Markdown格式）
+  coverUrl: string | null;        // 封面图片URL
+  stack: string | null;           // 技术栈（仅项目）
+  status: ContentStatus;          // 发布状态
+  publishedAt?: string | null;    // 发布时间
+  createdAt?: string;             // 创建时间
+  updatedAt?: string;             // 更新时间
+  tags: ContentTag[];             // 标签列表
 };
+/** 表单数据结构（将tags转为字符串便于输入） */
 type ContentForm = Omit<ContentItem, "tags"> & { tagsText: string };
+/** 页面模式：列表视图或编辑视图 */
 type Mode = "list" | "edit";
 
+/** 状态文字映射表 */
 const statusText: Record<ContentStatus, string> = {
   draft: "草稿",
   published: "已发布",
   archived: "已归档",
 };
 
+/**
+ * 创建空白内容表单数据
+ * @param type - 内容类型
+ * @returns 初始化的表单数据
+ */
 const blankContent = (type: ContentType): ContentForm => ({
   id: "",
   slug: "",
@@ -60,6 +72,11 @@ const blankContent = (type: ContentType): ContentForm => ({
   tagsText: "",
 });
 
+/**
+ * 将内容项转换为表单格式
+ * @param item - 原始内容项
+ * @returns 表单数据格式
+ */
 function toForm(item: ContentItem): ContentForm {
   return {
     ...item,
@@ -69,12 +86,22 @@ function toForm(item: ContentItem): ContentForm {
   };
 }
 
+/**
+ * 生成公开页面的URL
+ * @param item - 内容项（包含type、id、slug）
+ * @returns 公开页面路径
+ */
 function publicHref(item: Pick<ContentItem, "type" | "id" | "slug">) {
   return item.type === "article"
     ? `/articles/${item.id}`
     : `/projects/${item.slug}`;
 }
 
+/**
+ * 格式化日期为显示用的日期和时间部分
+ * @param value - ISO日期字符串
+ * @returns 包含date和time的对象
+ */
 function formatDateParts(value?: string | null) {
   if (!value) return { date: "未记录", time: "--:--" };
   const date = new Date(value);
@@ -86,6 +113,10 @@ function formatDateParts(value?: string | null) {
   return { date: `${month}.${day}`, time: `${hour}:${minute}` };
 }
 
+/**
+ * 日期徽章组件
+ * 显示格式化的日期时间，支持悬停显示完整时间
+ */
 function DateBadge({ value }: { value?: string | null }) {
   const parts = formatDateParts(value);
   const full = value
@@ -105,41 +136,58 @@ function DateBadge({ value }: { value?: string | null }) {
   );
 }
 
+/**
+ * 计算文本字数（去除空白字符）
+ * @param value - 输入文本
+ * @returns 字符数
+ */
 function wordCount(value: string) {
   return value.trim().replace(/\s+/g, "").length;
 }
 
+/**
+ * 内容管理面板组件
+ * 用于管理文章和项目的增删改查操作
+ * @param contentType - 内容类型（article或project）
+ */
 export default function AdminPanel({
   contentType,
 }: {
   contentType: ContentType;
 }) {
-  const [items, setItems] = useState<ContentItem[]>([]);
-  const [form, setForm] = useState<ContentForm | null>(null);
-  const [mode, setMode] = useState<Mode>("list");
-  const [isNew, setIsNew] = useState(false);
-  const [message, setMessage] = useState("正在验证管理员权限…");
-  const [saving, setSaving] = useState(false);
+  // ========== 状态管理 ==========
+  const [items, setItems] = useState<ContentItem[]>([]);      // 内容列表
+  const [form, setForm] = useState<ContentForm | null>(null);  // 表单数据
+  const [mode, setMode] = useState<Mode>("list");              // 当前模式
+  const [isNew, setIsNew] = useState(false);                   // 是否新建
+  const [message, setMessage] = useState("正在验证管理员权限…"); // 提示消息
+  const [saving, setSaving] = useState(false);                 // 保存状态
   const [statusFilter, setStatusFilter] = useState<"all" | ContentStatus>(
     "all",
-  );
-  const [page, setPage] = useState(1);
-  const pageSize = 5;
-  const typeName = contentType === "article" ? "文章" : "作品";
-  const coverOptions = useMemo(() => getCoverOptions(contentType), [contentType]);
-  const [uploadedCovers, setUploadedCovers] = useState<string[]>([]);
-  const coverScrollerRef = useRef<HTMLDivElement | null>(null);
-  const coverTrackRef = useRef<HTMLDivElement | null>(null);
-  const coverSetWidthRef = useRef(0);
-  const coverOffsetRef = useRef(0);
-  const coverPausedRef = useRef(false);
-  const coverResumeAtRef = useRef(0);
-  const coverTransitionTimerRef = useRef<number | undefined>(undefined);
-  const [coverRepeatCount, setCoverRepeatCount] = useState(3);
+  );                                                           // 状态筛选
+  const [page, setPage] = useState(1);                         // 当前页码
+  const pageSize = 5;                                          // 每页条数
+  const typeName = contentType === "article" ? "文章" : "作品"; // 类型名称
+
+  // ========== 封面相关状态 ==========
+  const coverOptions = useMemo(() => getCoverOptions(contentType), [contentType]); // 默认封面选项
+  const [uploadedCovers, setUploadedCovers] = useState<string[]>([]);            // 用户上传的封面
+  const coverScrollerRef = useRef<HTMLDivElement | null>(null);                  // 封面滚动容器引用
+  const coverTrackRef = useRef<HTMLDivElement | null>(null);                     // 封面轨道引用
+  const coverSetWidthRef = useRef(0);                                            // 单组封面宽度
+  const coverOffsetRef = useRef(0);                                              // 当前滚动偏移
+  const coverPausedRef = useRef(false);                                          // 是否暂停自动滚动
+  const coverResumeAtRef = useRef(0);                                            // 恢复自动滚动的时间点
+  const coverTransitionTimerRef = useRef<number | undefined>(undefined);          // 过渡动画计时器
+  const [coverRepeatCount, setCoverRepeatCount] = useState(3);                   // 封面重复次数
+
+  // 合并默认封面和上传封面（去重）
   const allCoverOptions = useMemo(
     () => Array.from(new Set([...coverOptions, ...uploadedCovers])),
     [coverOptions, uploadedCovers],
   );
+
+  // 创建循环显示的封面列表（实现无缝滚动）
   const loopedCoverOptions = useMemo(
     () =>
       Array.from({ length: coverRepeatCount }, (_, loopIndex) =>
@@ -148,9 +196,20 @@ export default function AdminPanel({
     [allCoverOptions, coverRepeatCount],
   );
 
+  // ========== API 工具方法 ==========
+
+  /**
+   * 获取认证请求头
+   * @returns 包含Authorization的请求头对象
+   */
   const headers = () => ({
     Authorization: `Bearer ${localStorage.getItem("personal-planet-admin-token")}`,
   });
+
+  /**
+   * 加载内容列表
+   * @returns 筛选后的内容列表
+   */
   const load = async () => {
     const response = await fetch(`${apiBase}/admin/content`, {
       headers: headers(),
@@ -162,6 +221,9 @@ export default function AdminPanel({
     return scoped;
   };
 
+  /**
+   * 加载用户上传的封面列表
+   */
   const loadUploadedCovers = async () => {
     const response = await fetch(
       `${apiBase}/admin/uploads/covers?type=${contentType}`,
@@ -172,6 +234,15 @@ export default function AdminPanel({
     setUploadedCovers(Array.isArray(data.urls) ? data.urls : []);
   };
 
+  // ========== 生命周期钩子 ==========
+
+  /**
+   * 组件挂载时初始化数据
+   * 1. 检查登录状态
+   * 2. 加载上传的封面
+   * 3. 加载内容列表
+   * 4. 根据URL参数决定是否直接进入编辑模式
+   */
   useEffect(() => {
     if (!localStorage.getItem("personal-planet-admin-token")) {
       setMessage("请返回首页并点击右侧星球插画登录。");
@@ -196,29 +267,43 @@ export default function AdminPanel({
       });
   }, [contentType]);
 
+  // ========== 分页和筛选逻辑 ==========
+
+  /** 根据状态筛选后的内容列表 */
   const visibleItems = useMemo(() => {
     return statusFilter === "all"
       ? items
       : items.filter((item) => item.status === statusFilter);
   }, [items, statusFilter]);
+
+  /** 总页数 */
   const totalPages = Math.max(1, Math.ceil(visibleItems.length / pageSize));
+  /** 当前页码（确保不超过总页数） */
   const currentPage = Math.min(page, totalPages);
+  /** 当前页显示的内容项 */
   const pagedItems = visibleItems.slice(
     (currentPage - 1) * pageSize,
     currentPage * pageSize,
   );
 
+  /** 类型或筛选条件变化时重置页码 */
   useEffect(() => {
     setPage(1);
   }, [contentType, statusFilter]);
 
+  // ========== 封面画廊自动滚动逻辑 ==========
+
+  /**
+   * 测量封面容器尺寸，动态计算需要重复的封面数量
+   * 使用 ResizeObserver 监听容器大小变化
+   */
   useEffect(() => {
     const scroller = coverScrollerRef.current;
     const track = coverTrackRef.current;
     if (!scroller || !track || !allCoverOptions.length) return;
 
     const measure = () => {
-      // 每组之间同样有 gap，不能直接用总宽度除以副本数；否则循环重置点会逐渐漂移。
+      // 每组之间同样有 gap，不能直接用总宽度除以副本数；否则循环重置点会逐渐漂移
       const firstCover = track.querySelector<HTMLButtonElement>("button");
       const cardWidth = firstCover?.getBoundingClientRect().width ?? 0;
       const gap = Number.parseFloat(getComputedStyle(track).gap) || 0;
@@ -238,20 +323,26 @@ export default function AdminPanel({
     return () => observer.disconnect();
   }, [allCoverOptions.length, coverRepeatCount, mode]);
 
+  /**
+   * 封面自动滚动动画
+   * 使用 requestAnimationFrame 实现平滑滚动效果
+   */
   useEffect(() => {
     const track = coverTrackRef.current;
     if (!track || mode !== "edit" || allCoverOptions.length <= 1) return;
 
     let frame = 0;
     let lastTime = performance.now();
-    const speed = 100;
+    const speed = 100; // 滚动速度（像素/秒）
 
     const tick = (time: number) => {
-      const delta = Math.min(48, time - lastTime);
+      const delta = Math.min(48, time - lastTime); // 限制最大时间增量，避免跳帧
       lastTime = time;
       const setWidth = coverSetWidthRef.current;
+      // 检查是否应该滚动：未暂停、已过恢复时间、有有效宽度
       if (!coverPausedRef.current && time >= coverResumeAtRef.current && setWidth > 0) {
         coverOffsetRef.current += (speed * delta) / 1000;
+        // 循环重置：当偏移超过单组宽度时，减去单组宽度实现无缝循环
         if (coverOffsetRef.current >= setWidth) {
           coverOffsetRef.current -= setWidth;
         }
@@ -269,6 +360,12 @@ export default function AdminPanel({
     };
   }, [allCoverOptions.length, mode, coverRepeatCount]);
 
+  // ========== 核心操作方法 ==========
+
+  /**
+   * 手动切换封面滑块
+   * @param direction - 切换方向（-1向左，1向右）
+   */
   function moveCoverSlide(direction: -1 | 1) {
     const track = coverTrackRef.current;
     if (!track) return;
@@ -278,25 +375,33 @@ export default function AdminPanel({
     const step = (card?.getBoundingClientRect().width ?? 320) + gap;
     const setWidth = coverSetWidthRef.current;
 
-    // 手动切换时先暂停自动滚动，避免两个动画同时修改 scrollLeft。
+    // 手动切换时先暂停自动滚动，避免两个动画同时修改
     coverResumeAtRef.current = performance.now() + 1050;
     let nextOffset = coverOffsetRef.current + direction * step;
+    // 确保偏移在有效范围内循环
     if (setWidth > 0) {
       while (nextOffset < 0) nextOffset += setWidth;
       while (nextOffset >= setWidth) nextOffset -= setWidth;
     }
 
+    // 清除之前的过渡计时器
     if (coverTransitionTimerRef.current) {
       window.clearTimeout(coverTransitionTimerRef.current);
     }
+    // 设置过渡动画
     track.style.transition = "transform 520ms cubic-bezier(.22, 1, .36, 1)";
     coverOffsetRef.current = nextOffset;
     track.style.transform = `translate3d(${-nextOffset}px, 0, 0)`;
+    // 动画结束后清除过渡样式
     coverTransitionTimerRef.current = window.setTimeout(() => {
       track.style.transition = "";
     }, 560);
   }
 
+  /**
+   * 编辑内容项
+   * @param item - 要编辑的内容项
+   */
   function editItem(item: ContentItem) {
     setForm(toForm(item));
     setIsNew(false);
@@ -304,6 +409,9 @@ export default function AdminPanel({
     setMessage("");
   }
 
+  /**
+   * 创建新内容
+   */
   function createNew() {
     setIsNew(true);
     setForm(blankContent(contentType));
@@ -311,6 +419,9 @@ export default function AdminPanel({
     setMessage(`正在创建新的${typeName}，填写后点击保存。`);
   }
 
+  /**
+   * 返回列表视图
+   */
   function backToList() {
     setMode("list");
     setIsNew(false);
@@ -318,13 +429,19 @@ export default function AdminPanel({
     setMessage("");
   }
 
+  /**
+   * 保存内容
+   * @param event - 表单提交事件
+   */
   async function save(event: { preventDefault: () => void }) {
     event.preventDefault();
     if (!form) return;
     setSaving(true);
     setMessage("");
+    
+    // 构建请求体
     const payload = {
-      ...(isNew ? { type: form.type } : {}),
+      ...(isNew ? { type: form.type } : {}), // 新建时需要传入类型
       title: form.title,
       summary: form.summary,
       body: form.body,
@@ -332,11 +449,13 @@ export default function AdminPanel({
       stack: form.stack,
       status: form.status,
       tags: form.tagsText
-        .split(/[,，]/)
-        .map((tag) => tag.trim())
-        .filter(Boolean),
+        .split(/[,，]/)           // 支持中英文逗号分隔
+        .map((tag) => tag.trim()) // 去除首尾空格
+        .filter(Boolean),         // 过滤空标签
     };
+
     try {
+      // 根据是否新建选择不同的API端点和方法
       const endpoint = isNew
         ? "/admin/content"
         : `/admin/content/${form.type}/${form.id}`;
@@ -345,12 +464,15 @@ export default function AdminPanel({
         headers: { ...headers(), "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
+
       if (!response.ok) throw new Error("save failed");
       const updated = (await response.json()) as ContentItem;
+
+      // 更新本地状态
       setItems((current) =>
         isNew
-          ? [updated, ...current]
-          : current.map((item) => (item.id === updated.id ? updated : item)),
+          ? [updated, ...current]                          // 新建：添加到列表开头
+          : current.map((item) => (item.id === updated.id ? updated : item)), // 更新：替换原项
       );
       setForm(toForm(updated));
       setIsNew(false);
@@ -366,20 +488,31 @@ export default function AdminPanel({
     }
   }
 
+  /**
+   * 上传封面图片
+   * @param event - 文件选择事件
+   */
   async function uploadCover(event: ChangeEvent<HTMLInputElement>) {
     const file = event.currentTarget.files?.[0];
     if (!file || !form) return;
+
+    // 文件类型校验
     if (!file.type.startsWith("image/")) {
       setMessage("请选择图片文件作为封面。");
       return;
     }
+
+    // 文件大小校验（最大20MB）
     if (file.size > 20 * 1024 * 1024) {
       setMessage("封面图片不能超过 20MB，请压缩后再上传。");
       return;
     }
+
+    // 构建FormData
     const data = new FormData();
     data.append("file", file);
     setMessage("封面图片上传中...");
+
     try {
       const response = await fetch(
         `${apiBase}/admin/uploads/cover?type=${contentType}`,
@@ -389,40 +522,57 @@ export default function AdminPanel({
           body: data,
         },
       );
+
       if (!response.ok) {
         const payload = await response.json().catch(() => null) as { message?: string | string[] } | null;
         const detail = Array.isArray(payload?.message)
           ? payload.message.join("；")
           : payload?.message;
+        
+        // 处理未授权情况
         if (response.status === 401) {
           localStorage.removeItem("personal-planet-admin-token");
           throw new Error("管理员登录已失效，请重新登录后上传。");
         }
         throw new Error(detail || `上传请求失败（HTTP ${response.status}）`);
       }
+
       const result = (await response.json()) as { url: string };
+      // 更新上传封面列表
       setUploadedCovers((current) =>
         current.includes(result.url) ? current : [result.url, ...current],
       );
+      // 设置当前封面
       setForm((current) => (current ? { ...current, coverUrl: result.url } : current));
       setMessage("封面图片已上传，保存内容后生效。");
     } catch (error) {
       const detail = error instanceof Error ? error.message : "未知错误";
       setMessage(`封面上传失败：${detail}`);
     } finally {
+      // 重置文件输入框
       event.currentTarget.value = "";
     }
   }
 
+  /**
+   * 删除内容项
+   * @param item - 要删除的内容项
+   */
   async function remove(item: ContentItem) {
+    // 确认删除
     if (!confirm(`确定删除“${item.title}”吗？此操作不可恢复。`)) return;
+
     try {
       const response = await fetch(
         `${apiBase}/admin/content/${item.type}/${item.id}`,
         { method: "DELETE", headers: headers() },
       );
+
       if (!response.ok) throw new Error("delete failed");
+
+      // 更新本地状态
       setItems((current) => current.filter((entry) => entry.id !== item.id));
+      // 如果删除的是当前编辑的项，返回列表
       if (form?.id === item.id) backToList();
       setMessage("内容已删除。");
     } catch {

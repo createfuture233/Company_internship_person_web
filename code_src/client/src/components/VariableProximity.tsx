@@ -3,17 +3,28 @@ import { useEffect, useMemo, useRef } from "react";
 import type { RefObject } from "react";
 import "./VariableProximity.css";
 
+/** 衰减函数类型 */
 type Falloff = "linear" | "exponential" | "gaussian";
+
+/**
+ * 可变字体邻近效应组件属性
+ * 根据鼠标位置动态调整字体变量设置，实现交互式文字效果
+ */
 type VariableProximityProps = {
-  label: string;
-  containerRef: RefObject<HTMLElement | null>;
-  className?: string;
-  radius?: number;
-  falloff?: Falloff;
-  fromFontVariationSettings?: string;
-  toFontVariationSettings?: string;
+  label: string;                        // 显示的文本内容
+  containerRef: RefObject<HTMLElement | null>; // 容器引用（用于计算鼠标相对位置）
+  className?: string;                   // 额外的 CSS 类名
+  radius?: number;                      // 影响半径（默认 100）
+  falloff?: Falloff;                    // 衰减函数类型
+  fromFontVariationSettings?: string;   // 起始字体变量设置
+  toFontVariationSettings?: string;     // 目标字体变量设置（鼠标悬停时）
 };
 
+/**
+ * 解析字体变量设置字符串
+ * @param settings - 字体变量设置字符串，格式如 "'wght' 400, 'opsz' 14"
+ * @returns 包含轴名和值的 Map
+ */
 function parseSettings(settings: string) {
   return new Map(
     settings

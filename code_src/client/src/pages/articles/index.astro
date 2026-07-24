@@ -1,21 +1,28 @@
 ---
-import BaseLayout from "../../layouts/BaseLayout.astro";
-import ProximityHeading from "../../components/ProximityHeading";
-import { apiBase } from "../../lib/api";
-import { resolveCover } from "../../lib/defaultCovers";
+/**
+ * 文章列表页面
+ * 展示所有文章，支持分页浏览
+ */
+import BaseLayout from "../../layouts/BaseLayout.astro";      // 基础布局
+import ProximityHeading from "../../components/ProximityHeading"; // 邻近效应标题
+import { apiBase } from "../../lib/api";                        // API配置
+import { resolveCover } from "../../lib/defaultCovers";        // 封面解析工具
 
+/** 文章类型 */
 type Article = {
-  id: string;
-  title: string;
-  summary: string;
-  coverUrl: string | null;
-  publishedAt: string | null;
-  tags: Array<{ name: string }>;
+  id: string;                     // 文章ID
+  title: string;                  // 标题
+  summary: string;                // 摘要
+  coverUrl: string | null;        // 封面图片URL
+  publishedAt: string | null;     // 发布时间
+  tags: Array<{ name: string }>;  // 标签列表
 };
 
-let articles: Article[] = [];
-let loadError = false;
+// 数据初始化
+let articles: Article[] = [];  // 文章列表
+let loadError = false;         // 加载错误标志
 
+// SSR期间获取文章数据
 try {
   const response = await fetch(`${apiBase}/articles`);
   if (!response.ok) throw new Error("Unable to load articles");
@@ -24,6 +31,11 @@ try {
   loadError = true;
 }
 
+/**
+ * 格式化日期为中文格式
+ * @param value - ISO日期字符串
+ * @returns 格式化的日期
+ */
 const formatDate = (value: string | null) =>
   value
     ? new Intl.DateTimeFormat("zh-CN", { dateStyle: "medium" }).format(
@@ -31,17 +43,13 @@ const formatDate = (value: string | null) =>
       )
     : "持续更新";
 
-const pageSize = 9;
-const requestedPage = Number(Astro.url.searchParams.get("page") ?? "1");
-const totalPages = Math.max(1, Math.ceil(articles.length / pageSize));
-const currentPage = Number.isFinite(requestedPage)
-  ? Math.min(Math.max(1, Math.trunc(requestedPage)), totalPages)
-  : 1;
-const pagedArticles = articles.slice(
-  (currentPage - 1) * pageSize,
-  currentPage * pageSize,
-);
-const pageNumbers = Array.from({ length: totalPages }, (_, index) => index + 1);
+// 分页配置
+const pageSize = 9;                                                                 // 每页条数
+const requestedPage = Number(Astro.url.searchParams.get("page") ?? "1");             // 请求的页码
+const totalPages = Math.max(1, Math.ceil(articles.length / pageSize));              // 总页数
+const currentPage = Number.isFinite(requestedPage) ? Math.min(Math.max(1, Math.trunc(requestedPage)), totalPages) : 1; // 当前页码（安全处理）
+const pagedArticles = articles.slice((currentPage - 1) * pageSize, currentPage * pageSize); // 当前页文章
+const pageNumbers = Array.from({ length: totalPages }, (_, index) => index + 1);    // 页码数组
 ---
 
 <BaseLayout title="文章｜B-612星球">

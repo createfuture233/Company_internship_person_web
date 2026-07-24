@@ -2,26 +2,41 @@ import { apiBase } from "../lib/api";
 import { Shield, X } from "lucide-react";
 import { useState } from "react";
 
+/**
+ * 管理员登录组件
+ * 提供管理员登录入口和登录弹窗
+ */
 export default function AdminPlanetLogin() {
-  const [showLogin, setShowLogin] = useState(false);
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
-  const [status, setStatus] = useState("");
-  const [submitting, setSubmitting] = useState(false);
+  const [showLogin, setShowLogin] = useState(false); // 是否显示登录弹窗
+  const [username, setUsername] = useState("");       // 用户名
+  const [password, setPassword] = useState("");       // 密码
+  const [status, setStatus] = useState("");           // 登录状态提示
+  const [submitting, setSubmitting] = useState(false); // 是否正在提交
 
+  /**
+   * 处理登录请求
+   * @param event - 表单提交事件
+   */
   async function login(event: { preventDefault: () => void }) {
     event.preventDefault();
     setSubmitting(true);
     setStatus("");
+
     try {
       const response = await fetch(apiBase + "/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ username, password }),
       });
+
       if (!response.ok) throw new Error("login failed");
+      
       const data = (await response.json()) as { token: string };
+      
+      // 保存令牌到本地存储
       localStorage.setItem("personal-planet-admin-token", data.token);
+      
+      // 重定向到后台首页
       window.location.href = "/admin";
     } catch {
       setStatus("账号或密码错误，请重试。");

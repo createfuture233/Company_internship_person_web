@@ -2,21 +2,26 @@ import { useEffect, useMemo, useState } from "react";
 import { BarChart3, FileText, FolderKanban, Heart, Mail, MessageCircle, PieChart, Sparkles, TrendingUp } from "lucide-react";
 import { apiBase } from "../lib/api";
 
+/** 趋势数据点类型 */
 type TrendPoint = { date: string; contents: number; comments: number; messages: number };
+
+/** 概览数据类型 */
 type Overview = {
-  articles: number;
-  projects: number;
-  comments: number;
-  unreadMessages: number;
+  articles: number;                                    // 文章数量
+  projects: number;                                   // 作品数量
+  comments: number;                                   // 评论数量
+  unreadMessages: number;                             // 未读消息数量
   totals: { contents: number; comments: number; messages: number; interactions: number; likes: number };
-  contentStatus: { draft: number; published: number; archived: number };
-  contentTypes: { article: number; project: number };
-  commentStatus: { visible: number; hidden: number; spam: number };
-  commentByContent: { article: number; project: number };
-  messageStatus: { unread: number; read: number; replied: number; archived: number };
-  trend: TrendPoint[];
-  insights: { responseRate: number; averageLikes: number; publishedRate: number };
+  contentStatus: { draft: number; published: number; archived: number };  // 内容状态分布
+  contentTypes: { article: number; project: number }; // 内容类型分布
+  commentStatus: { visible: number; hidden: number; spam: number };       // 评论状态分布
+  commentByContent: { article: number; project: number };                 // 评论按内容类型分布
+  messageStatus: { unread: number; read: number; replied: number; archived: number }; // 消息状态分布
+  trend: TrendPoint[];                                // 趋势数据
+  insights: { responseRate: number; averageLikes: number; publishedRate: number }; // 洞察数据
 };
+
+/** 图表分段数据类型 */
 type Segment = { label: string; value: number; color: string };
 
 function emptyTrend(): TrendPoint[] {

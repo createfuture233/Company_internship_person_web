@@ -1,19 +1,28 @@
+/**
+ * 评论控制器
+ * 处理评论的获取、创建和点赞功能
+ */
 import { BadRequestException, Body, ConflictException, Controller, Get, Headers, NotFoundException, Param, Post, Query } from '@nestjs/common'
 import { IsIn, IsNotEmpty, MaxLength } from 'class-validator'
 import { CommentStatus, ContentStatus, ContentType, Prisma } from '@prisma/client'
 import { PrismaService } from '../../prisma/prisma.module'
 
+/** 评论排序类型 */
 type CommentSort = 'latest' | 'likes'
 
+/**
+ * 获取当前时间的ISO字符串
+ */
 function nowIso() {
   return new Date().toISOString()
 }
 
+/** 创建评论DTO */
 class CreateCommentDto {
-  @IsIn(['article', 'project']) contentType!: ContentType
-  @IsNotEmpty() @MaxLength(80) contentId!: string
-  @IsNotEmpty() @MaxLength(30) name!: string
-  @IsNotEmpty() @MaxLength(600) content!: string
+  @IsIn(['article', 'project']) contentType!: ContentType  // 内容类型
+  @IsNotEmpty() @MaxLength(80) contentId!: string          // 内容ID
+  @IsNotEmpty() @MaxLength(30) name!: string               // 评论者姓名
+  @IsNotEmpty() @MaxLength(600) content!: string           // 评论内容
 }
 
 @Controller('api')
